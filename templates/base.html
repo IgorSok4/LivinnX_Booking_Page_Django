@@ -1,0 +1,115 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <title>{% block title %}{% endblock title %}</title>
+    <link rel="stylesheet" href="{% static 'bootstrap/css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Averia+Gruesa+Libre&amp;display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Averia+Libre&amp;display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Bebas+Neue&amp;display=swap">
+    <link rel="stylesheet" href="{% static 'css/swiper-icons.css' %}">
+    <link rel="stylesheet" href="{% static 'css/aos.min.css' %}">
+    <link rel="stylesheet" href="{% static 'css/Login-Form-Basic-icons.css' %}">
+    <link rel="stylesheet" href="{% static 'css/Simple-Slider-swiper-bundle.min.css' %}">
+    <link rel="stylesheet" href="{% static 'css/Simple-Slider.css' %}">
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <link rel="stylesheet" href="{% static 'css/accordion-faq-list.css' %}">
+    <link rel="stylesheet" href="{% static 'css/post_detail_style_photo.css' %}">
+    <style>
+        .nav-up {
+        transform: translateY(-100%);
+        transition: transform 0.5s ease-in-out;
+        }
+    </style>
+
+</head>
+<body style="margin: 0px;color: #51abac;">
+    <nav class="navbar navbar-dark navbar-expand-lg fixed-top bg-dark d-xl-flex align-items-xl-end portfolio-navbar gradient" style="color: rgb(0,0,0);background: rgb(0,0,0);border-color: rgb(0,0,0);">
+        <div class="container"><a class="navbar-brand logo" href="{% url 'index' %}"><img data-aos="fade" src="{% static 'img/livinn-logo.png' %}"></a><button data-bs-toggle="collapse" class="navbar-toggler" data-bs-target="#navbarNav"><span class="visually-hidden">Toggle navigation</span><span class="navbar-toggler-icon"></span></button>
+            <div class="collapse navbar-collapse" data-aos="fade" data-aos-duration="950" id="navbarNav">
+                <h2 style="color: rgb(255,255,255);font-family: 'Bebas Neue', serif;">Reservation panel</h2>
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link link-light" href="https://livinnxpoland.pl" style="font-family: 'Bebas Neue', serif;font-size: 20px;">LIVINNX WEBSITE</a></li>
+                    <li class="nav-item"><a class="nav-link link-light" href="https://livinnx.panelnajemcy.pl/login" style="font-family: 'Bebas Neue', serif;font-size: 20px;">student panel</a></li>
+                    {% if request.user.is_authenticated %}
+                        {% if section == "dashboard" %}
+                        <li class="nav-item"><a class="nav-link link-light" href="{% url 'dashboard' %}" style="font-family: 'Bebas Neue', serif;font-size: 20px;color: #51abac!important;">Dashboard</a></li>
+                        {% else %}
+                        <li class="nav-item"><a class="nav-link link-light" href="{% url 'dashboard' %}" style="font-family: 'Bebas Neue', serif;font-size: 20px;">Dashboard</a></li>
+                        {% endif %}
+                        {% if section == "reservation" %}
+                        <li class="nav-item"><a class="nav-link link-light" href="{% url 'reservation' %}" style="font-family: 'Bebas Neue', serif;font-size: 20px;color: #51abac!important;">Reservation</a></li>
+                        {% else %}
+                        <li class="nav-item"><a class="nav-link link-light" href="{% url 'reservation' %}" style="font-family: 'Bebas Neue', serif;font-size: 20px;">Reservation</a></li>
+                        {% endif %}
+                    <li class="nav-item"><a class="nav-link link-light" href="{% url 'user_profile' %}" style="font-family: 'Bebas Neue', serif;font-size: 20px;">Hello, {{ user.first_name }}</a></li>
+                    <li class="nav-item"><a class="nav-link text-center" href="{% url 'logout' %}" style="font-family: 'Bebas Neue', serif;font-size: 20px;color: rgb(255,255,255);background: var(--bs-red);border-color: rgb(194,22,85);width: 99px;margin: 0px;padding: 7px;">LOGOUT</a></li>
+                    {% else %}
+                    <li class="nav-item"><a class="nav-link text-center" href="{% url 'login' %}" style="font-family: 'Bebas Neue', serif;font-size: 20px;color: rgb(255,255,255);background: var(--bs-red);border-color: rgb(194,22,85);width: 99px;margin: 0px;padding: 7px;">LOGIN</a></li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+    {% if messages %}
+    <ul class="messages">
+      {% for message in messages %}
+        <li class="{{ message.tags }}">
+          {{ message|safe }}
+            <a href="#" class="close">x</a>
+        </li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+    {% block content %}
+    {% endblock content %}
+    <footer style="background: #212529;height: 664px;color: rgb(36,40,43);"><img width="225" height="81" src="{% static 'img/livinn-logo.png'%}" style="padding-right: 0px;margin-right: 0px;margin-left: 86px;padding-top: 0px;margin-top: 43px;">
+        <h1 style="color: rgb(255,255,255);font-family: 'Bebas Neue', serif;text-align: left;margin-right: 0px;padding-left: 84px;width: 349px;padding-top: 24px;margin-left: 0px;font-size: 30px;">ADDRESS</h1>
+        <p style="color: rgb(255,255,255);font-family: 'Averia Libre', serif;font-size: 16px;margin-left: 0px;padding-left: 84px;padding-right: 0px;width: 413px;">LivinnX Office Kraków<br>Romanowicza 4&nbsp;<br>30-702 Kraków<br><br>Opening hours:<br>Monday - Friday: 8AM - 6PM<br><br>Godziny otwarcia:<br>Poniedziałek - piątek: 08:00 - 18:00</p>
+        <footer class="text-center">
+            <div class="container text-muted py-4 py-lg-5">
+                <ul class="list-inline">
+                    <li class="list-inline-item me-4"><a class="link-secondary" href="#" style="font-family: 'Bebas Neue', serif;font-size: 27px;">Regulations</a></li>
+                    <li class="list-inline-item me-4"><a class="link-secondary" href="#" style="font-size: 27px;font-family: 'Bebas Neue', serif;">Contact</a></li>
+                    <li class="list-inline-item"><a class="link-secondary" href="#" style="font-size: 27PX;font-family: 'Bebas Neue', serif;">COMPANY DATA</a></li>
+                </ul>
+                    <a href="https://www.facebook.com/livinnXkrakow"><img src="{% static 'img/footer-icon-fb.png' %}" width="45" height="45" style="margin-bottom: 18px;margin-right: 10px;"></a>
+                    <a href="https://www.instagram.com/livinnxkrakow/"><img src="{% static 'img/footer-icon-in.png' %}" style="margin-bottom: 18px;"></a>
+                    <a href="https://www.youtube.com/@livinnxkrakow8115"><img src="{% static 'img/footer-icon-yt.png' %}" style="margin-bottom: 18px;margin-left: 10px;"></a>   
+                <p class="mb-0" style="color: white;">Copyright © 2023 Igor Sokół | GGH Management Sp. z o.o. sk</p>
+            </div>
+        </footer>
+    </footer>
+    <script src="{% static 'bootstrap/js/bootstrap.min.js' %}"></script>
+    <script src="{% static 'js/aos.min.js' %}"></script>
+    <script src="{% static 'js/bs-init.js' %}"></script>
+    <script src="{% static 'js/Simple-Slider-swiper-bundle.min.js' %}"></script>
+    <script src="{% static 'js/Simple-Slider.js' %}"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="{% static 'js/choosen-hours.js' %}"></script>
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+{% block extra_js %}
+    <script>
+        var lastScrollTop = 0;
+        var navbar = document.querySelector('nav');
+
+        window.addEventListener('scroll', function() {
+            var scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+
+            if (scrollTop > 100) { // Dodane sprawdzenie, czy przewinięto o więcej niż 100 pikseli
+                if (scrollTop > lastScrollTop) {
+                    navbar.classList.add('nav-up');
+                } else {
+                    navbar.classList.remove('nav-up');
+                }
+            }
+            
+            lastScrollTop = scrollTop;
+        });
+    </script>
+{% endblock extra_js %}
+
+</body>
+</html>

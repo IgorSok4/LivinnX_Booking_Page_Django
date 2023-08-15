@@ -1,0 +1,194 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ object.amenity.name }}Reservation{% endblock title %}
+
+
+{% block content %}
+<form method="post" action="">
+{% csrf_token %}
+<section style="background: linear-gradient(#ffffff, rgb(220,121,157) 58%, #c21655 99%);">
+    <style>
+        .swal-overlay {
+          background-color: rgba(0, 0, 0, 0);
+        }
+        .swal-title {
+            font-family: 'Bebas Neue'; 
+        }
+        .no-interaction {
+            pointer-events: none;
+            opacity: 0.3;
+        }
+    </style>
+    <div class="container" style="padding-top: 8rem!important;">
+        <div class="row">
+            <div class="col-md-12" style="margin-top: 84px;height: 194px;">
+                <h1 class="text-center" style="font-family: 'Bebas Neue', serif; color: black;">{{ object.amenity.name }}</h1>
+                <p><center style="font-weight: bold; color: black;">{{ object.amenity.description }}</center></p>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4" style="margin-top: 43px; color: black;">
+                <h4 style="text-align: center; color: black;">Timetable and information</h4>
+                <p><center style="font-weight: bold;">{{ object.amenity.opening_hours|linebreaks }}</center></p>
+                <button id="regulations-btn" class="btn btn-info" style="margin: auto; display: block;">Terms of use</button>
+            </div>
+            <div class="col-md-4" style="margin-top: 43px;">
+                <h4 style="text-align: center; color: black;">{{ today }}</h4>
+                <div class="hours_container">
+                    <div>
+                        {% for hour in object.hours_available_today.all %}
+                        <label for="{{ hour }}">
+                            <input type="checkbox" id="{{ hour }}" name="{{ hour }}" class="hour-checkbox today-checkbox" value="{{ hour }}">
+                            <span>{{ hour }}</span>
+                        </label>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4" style="margin-top: 43px;">
+                <h4 style="text-align: center; color: black;">{{ tomorrow }}</h4>
+                <div class="hours_container">
+                    <div>
+                        {% for hour in object.hours_available_tomorrow.all %}
+                        <label for="{{ hour }}">
+                            <input type="checkbox" id="{{ hour }}" name="{{ hour }}" class="hour-checkbox tomorrow-checkbox">
+                            <span>{{ hour }}</span>
+                        </label>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            <div class="container" style="margin-top: 100px;">
+                <div class="row">
+                    <div class="col-md-4">
+                        <h4 style="text-align: center;">Additional information</h4>
+                        <p style="text-align: center;">{{ object.amenity.additional_info }}</p>
+                    </div>
+                    <div class="col-md-4">
+                        <h3>Choosen hours</h3>
+                        <ul id="chosen-hours-list">
+                        </ul>
+                    </div>
+                    <input type="hidden" name="hours" id="hidden-hours-input">
+                    <div class="col-md-4"><button class="btn btn-primary" data-toggle="modal" data-target="#exampleModal" type="submit">Make reservation</button></div>
+                </div>
+            </div>
+</form>
+</section>
+{% endblock content %}
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    var user_hours_booked = {{ hours_booked|length }};
+    var user_active = {{ user_active|yesno:"1,0" }};
+    var maxCheck;
+
+    if (user_active) {
+        maxCheck = 4 - user_hours_booked;
+        if(user_hours_booked === 4) {
+            maxCheck = 0;
+            swal("Reservation Limit Reached", "You have already made 4 reservations and cannot make any more.", "error");
+        }
+    } else {
+        $("section").addClass("no-interaction");
+        maxCheck = 0;
+        swal({
+            title: "User Not Active",
+            text: "You are not an active user and cannot interact with this content.",
+            icon: "error",
+            buttons: false,
+        });
+    }
+
+    var checkboxes = $('.hour-checkbox');
+    var reserveButton = $('.btn-primary');
+
+    if(checkboxes.filter(':checked').length === 0) {
+        reserveButton.prop('disabled', true);
+        reserveButton.addClass('btn-secondary');
+        reserveButton.removeClass('btn-primary');
+    }
+
+    checkboxes.change(function() {
+        var currentCheck = checkboxes.filter(':checked').length;
+
+        if(currentCheck > 0) {
+            reserveButton.prop('disabled', false);
+            reserveButton.addClass('btn-primary');
+            reserveButton.removeClass('btn-secondary');
+        } else {
+            reserveButton.prop('disabled', true);
+            reserveButton.addClass('btn-secondary');
+            reserveButton.removeClass('btn-primary');
+        }
+
+        if(currentCheck > maxCheck){
+            swal("Max Selection Limit", "You can select a maximum of " + maxCheck + " time blocks.", "warning");
+            $(this).prop('checked', false);
+            currentCheck--;
+        }
+        
+            var chosenHoursList = $("#chosen-hours-list");
+        
+            chosenHoursList.find('li:contains("' + $(this).val() + '")').remove();
+        
+            if ($(this).is(':checked')) {
+                chosenHoursList.append('<li>' + $(this).val() + '</li>');
+            }
+    
+
+            // preparing list with comma separated hours for UserReservation model
+            var chosenHoursArray = [];
+
+            checkboxes.each(function() {
+                if ($(this).is(':checked')) {
+                    chosenHoursArray.push($(this).val());
+                }
+            });
+
+            // join chosen hours together
+            $('#hidden-hours-input').val(chosenHoursArray.join(','));
+        });
+    });
+    $('#regulations-btn').click(function(e) {
+        e.preventDefault();
+
+        var regulations = "{{ object.amenity.regulations|escapejs }}";
+        
+        swal({
+            title: "Regulations",
+            text: regulations,
+            icon: "info",
+        });
+    });
+    $('.btn-primary').click(function(e) {
+        e.preventDefault();
+
+        var amenity = "{{ object.amenity.name }}";
+        var chosenHours = $('#hidden-hours-input').val();
+        var today = "{{ today }}"
+        var tomorrow = "{{ tomorrow }}"
+
+        swal({
+            title: "Are you sure?",
+            text: "You are about to make " + amenity + " reservation on " + today + " for the following hours: \n" + chosenHours + "\n" + tomorrow + ": ",
+            icon: "warning",
+            buttons: true,
+            dangerMode: true,
+        })
+        .then((willReserve) => {
+            if (willReserve) {
+                swal("Reservation successful!", {
+                    icon: "success",
+                });
+                // Submit the form
+                setTimeout(function() {
+                    $("form").submit();
+                }, 1000);
+            } else {
+                swal("Your reservation has been cancelled.");
+            }
+        });
+    });
+</script>
+{% endblock extra_js %}

@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+
+{% block title %}LivinnX Resident Dashboard{% endblock title %}
+
+{% block content %}
+<style>
+    p, h2, h4 {
+        color: black;
+        font-family: 'Bebas Neue', serif;
+    }
+    h5 {
+        color: black;
+    }
+    a {
+        text-decoration: none;
+        color: black;
+        transition: 0.2s;
+    }
+    a:hover{
+        color: #51abac;
+    }
+    body {
+        background: linear-gradient(45deg, #1e90ff, #4682b4, #87cefa, #add8e6, #ffffff);
+        background-size: 200% 200%;
+        animation: Gradient 10s ease infinite;
+        }
+        @keyframes Gradient {
+        0% {
+            background-position: 0% 50%;
+        }
+        50% {
+            background-position: 100% 50%;
+        }
+        100% {
+            background-position: 0% 50%;
+        }
+        }
+</style>
+<section style="margin-top:100px;">
+    <div class="container py-4 py-xl-5" style="padding-top: 7rem!important;">
+        <div class="row mb-5">
+            <div class="col-md-8 col-xl-6 text-center mx-auto">
+                <h2>LivinnX announcements</h2>
+                <p>The latest announcements and posts from the building administration.</p>
+            </div>
+        </div>
+        <div class="row gy-4 row-cols-1 row-cols-md-2 row-cols-xl-3">
+            {% for post in latest_posts %}
+            <div class="col">
+                <div class="p-4"><span class="badge rounded-pill bg-primary mb-2" style="background: #51abac!important">
+                    {{ post.type|title }}</span>
+                    <h2><a href="{% url 'post_detail' slug=post.slug %}">{{ post.title }}</a></h2>
+                    {% with post.body_en as text %}
+                    <h5>{{ text|slice:":200" }}
+                    {% if text|length > 200 %}
+                    <a href="{% url 'post_detail' slug=post.slug %}" style="text-decoration: underline;">read more</a>{% endif %}</h5>
+                    {% endwith %}
+                    <div class="d-flex"><img class="flex-shrink-0 me-3 fit-cover" width="60" height="60" src="{{ post.author.profile.photo.url }}">
+                        <div>
+                            <p class="fw-bold mb-0">{{ post.author }}</p>
+                            <p class="text-muted mb-0">{{ post.published }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    <div class="container d-flex flex-column align-items-center py-4 py-xl-5">
+        <div class="row gy-4 row-cols-1 row-cols-md-2 w-100" style="max-width: 800px;">
+            <div class="col order-md-first">
+                <div class="card"><img class="card-img w-100 d-block" src="https://cdn.bootstrapstudio.io/placeholders/1400x800.png">
+                    <div class="card-img-overlay text-center d-flex flex-column justify-content-center align-items-center p-4">
+                        <h4>Title</h4>
+                        <p>Volutpat habitasse risus posuere, commodo fusce donec. Turpis donec tristique.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col d-md-flex order-first justify-content-md-start align-items-md-end order-md-1">
+                <div style="width: 80%;">
+                    <h2>Litora vivamus dui, nam aliquam aenean</h2>
+                    <p>Curae hendrerit donec commodo hendrerit egestas tempus, turpis facilisis nostra nunc. Vestibulum dui eget ultrices.</p>
+                </div>
+            </div>
+            <div class="col order-md-2">
+                <div class="card"><img class="card-img w-100 d-block" src="https://cdn.bootstrapstudio.io/placeholders/1400x800.png">
+                    <div class="card-img-overlay text-center d-flex flex-column justify-content-center align-items-center p-4">
+                        <h4>Title</h4>
+                        <p>Volutpat habitasse risus posuere, commodo fusce donec. Turpis donec tristique.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col order-md-2">
+                <div class="card"><img class="card-img w-100 d-block" src="https://cdn.bootstrapstudio.io/placeholders/1400x800.png">
+                    <div class="card-img-overlay text-center d-flex flex-column justify-content-center align-items-center p-4">
+                        <h4>Title</h4>
+                        <p>Volutpat habitasse risus posuere, commodo fusce donec. Turpis donec tristique.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock content %}

@@ -1,0 +1,146 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ post.title }} Post{% endblock title %}
+
+{% block content %}
+
+<style>
+    p {
+        color: black;
+        font-family: 'MyriadPro', sans-serif;
+    }
+    h2, h4 {
+        color: black;
+        font-family: 'Bebas Neue', serif;
+    }
+    h5 {
+        color: black;
+        font-family: 'MyriadPro', sans-serif;
+    }
+    a {
+        text-decoration: none;
+        color: black;
+        transition: 0.2s;
+    }
+    a:hover {
+        color: #51abac;
+    }
+    body {
+    background: linear-gradient(45deg, #1e90ff, #4682b4, #87cefa, #add8e6, #ffffff);
+    background-size: 200% 200%;
+    animation: Gradient 10s ease infinite;
+    }
+    @keyframes Gradient {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+    }
+</style>
+<section>
+    <div class="container py-4 py-xl-5" style="padding-top: 10rem!important;">
+        <div class="row gy-4 row-cols-1 row-cols-md-2 row-cols-xl-3" style="background: white;border-radius: 20px;padding-bottom:20px;">
+        <div class="col">
+            <img id="postImage" width="100" height="80" style="width: 350px;height: 341px;object-fit: cover;border-radius: 20px;margin-bottom: 50px;" src="{{ post.image.url }}">
+            <div style="margin-bottom:100px;">
+                <a href="{{ post.file.doc.url }}"></a>
+                {% if next_post %}
+                <a href="{% url 'post_detail' slug=next_post.slug %}">
+                    <button class="btn-post">Next post</button>
+                </a>
+                {% endif %}
+                {% if prev_post %}
+                    <a href="{% url 'post_detail' slug=prev_post.slug %}">
+                        <button class="btn-post">Previous post</button>
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+        <div id="myModal" class="modal">
+            <img class="modal-content" id="img01">
+            <span class="close">&times;</span>
+        </div>
+            <div class="col">
+                <div class="p-4">
+                    <div>
+                        <span class="badge rounded-pill bg-primary mb-2" style="background: #51abac!important">{{ post.type|title }}</span>
+                        <span class="badge rounded-pill bg-primary mb-2" style="background: #51abac!important">Added {{ post.publish|date:"m/d/Y" }}</span>
+                        <img src="{% static 'img/flags/en.png' %}" id="en-button" alt="EN" style="cursor:pointer; width: 20px;">
+                        <img src="{% static 'img/flags/pl.png' %}" id="pl-button" alt="PL" style="cursor:pointer; width: 20px;">
+                        <img src="{% static 'img/flags/rus.png' %}" id="ru-button" alt="RU" style="cursor:pointer; width: 20px;">
+                    </div>
+                    <h4>{{ post.title }}</h4>
+                    <div id="body-en" style="color: black;">{{ post.body_en|linebreaksbr }}</div>
+                    <div id="body-pl" style="display: none;color: black;">{{ post.body_pl|linebreaksbr }}</div>
+                    <div id="body-ru" style="display: none;color: black;">{{ post.body_ru|linebreaksbr }}</div>
+                    <div class="d-flex">
+                        <img class="flex-shrink-0 me-3 fit-cover" width="60" height="60" style="margin-top: 30px;margin-bottom: 10px;" src="{{ post.author.profile.photo.url }}">
+                        <p class="fw-bold mb-0" style="margin-top: 30px;">{{ post.author }}</p>
+                        {% comment %} TO DO 
+                            sending post to other users via email or aka share button
+                         {% endcomment %}
+                    </div>
+                </div>
+            </div>
+            <div class="col">
+                <fieldset>
+                    <legend style="font-family: 'Bebas Neue', serif;">Attachments</legend>
+                    <ul>
+                        {% if post.file %}
+                        <a href="{{ post.file.doc.url }}">Download attachments</a>
+                        {% else %}
+                        <p>No attachments</p>
+                        {% endif %}
+                    </ul>
+                </fieldset>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock content %}
+{% block extra_js %}
+<script>
+    var modal = document.getElementById("myModal");
+    var img = document.getElementById("postImage");
+    var modalImg = document.getElementById("img01");
+    var span = document.getElementsByClassName("close")[0];
+
+    img.onclick = function(){
+    modal.style.display = "block";
+    modalImg.src = this.src;
+    }
+
+    span.onclick = function() { 
+    modal.style.display = "none";
+    }
+
+    window.onclick = function(event) {
+    if (event.target == modal) {
+        modal.style.display = "none";
+    }
+    }
+        document.getElementById("en-button").addEventListener("click", function() {
+        document.getElementById("body-en").style.display = "block";
+        document.getElementById("body-pl").style.display = "none";
+        document.getElementById("body-ru").style.display = "none";
+    });
+
+    document.getElementById("pl-button").addEventListener("click", function() {
+        document.getElementById("body-en").style.display = "none";
+        document.getElementById("body-pl").style.display = "block";
+        document.getElementById("body-ru").style.display = "none";
+    });
+
+    document.getElementById("ru-button").addEventListener("click", function() {
+        document.getElementById("body-en").style.display = "none";
+        document.getElementById("body-pl").style.display = "none";
+        document.getElementById("body-ru").style.display = "block";
+    });
+</script>
+{% endblock extra_js %}

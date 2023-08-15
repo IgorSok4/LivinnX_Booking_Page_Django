@@ -1,0 +1,88 @@
+.nav-link {
+  transition: all 0.1s;
+}
+
+.nav-link:hover {
+  color: #51abac !important;
+  transition-delay: 2ms;
+}
+
+.btn {
+  font-size: 20px;
+  transition: 0.2s;
+  background-color: #51abac;
+  background: #51abac;
+  height: 40px;
+  border-style: none;
+  font-family: 'Bebas Neue', serif;
+}
+
+.btn:hover {
+  color: #ffffff;
+  background: #c21655;
+}
+
+.btn-post {
+  font-size: 20px;
+  transition: 0.2s;
+  background-color: #51abac;
+  background: #51abac;
+  height: 40px;
+  border-style: none;
+  font-family: 'Bebas Neue', serif;
+}
+
+.btn-post:hover {
+  color: #ffffff;
+  background: #c21655;
+}
+
+.hours_container {
+  display: flex;
+  margin: 0 auto;
+  flex-wrap: wrap;
+}
+
+.hours_container div {
+  margin: 10px;
+}
+
+.hours_container div label {
+  cursor: pointer;
+  display: contents;
+}
+
+.container div label input[type="checkbox"] {
+  display: none;
+}
+
+.container div label span {
+  position: relative;
+  display: inline-block;
+  background: #51abac;
+  color: #000000;
+  padding: 15px 20px;
+  text-shadow: 0 1px 4px rgba(0,0,0,.5);
+  border-radius: 30px;
+  font-size: 20px;
+  margin: 2px;
+  transition: 0.5s;
+  user-select: none;
+  overflow: hidden;
+}
+
+.container div label span:before {
+  content: '';
+  position: absolute;
+  top: 0;
+  Left: 0;
+  width: 100%;
+  height: 50%;
+  background: rgba(255,255,255, .1);
+}
+
+.container div:nth-child(6n + 1) label input[type="checkbox"]:checked ~ span {
+  background:#c21655;
+  color: #fff;
+  box-shadow: 0 2px 20px #c21655;
+}
