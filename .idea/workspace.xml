@@ -1,7 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="c6bc8bab-08ea-48f4-a3b3-5552b5e2b8fb" name="Changes" comment="Initial commit" />
+    <list default="true" id="c6bc8bab-08ea-48f4-a3b3-5552b5e2b8fb" name="Changes" comment="Initial commit">
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/AmenityBooker/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/AmenityBooker/urls.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/AmenityBooker/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/AmenityBooker/views.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/db.sqlite3" beforeDir="false" afterPath="$PROJECT_DIR$/db.sqlite3" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/account/dashboard.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/account/dashboard.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/account/edit.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/account/edit.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/base.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/base.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/blog/post_detail.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/blog/post_detail.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/reservation/reservation_detail.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/reservation/reservation_detail.html" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -23,7 +33,7 @@
   "keyToString": {
     "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
-    "last_opened_file_path": "C:/Users/Igor/Desktop/LivinnX_Amenity_Booker"
+    "last_opened_file_path": "C:/Users/Igor/Desktop/LivinnX_Amenity_Booker/LivinnX_Booking_Page/LivinnX_Booking_Page"
   }
 }]]></component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />

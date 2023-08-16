@@ -163,12 +163,12 @@ $(document).ready(function() {
     });
     $('.btn-primary').click(function(e) {
         e.preventDefault();
-
+    
         var amenity = "{{ object.amenity.name }}";
         var chosenHours = $('#hidden-hours-input').val();
-        var today = "{{ today }}"
+        var today = "{{ today|date:'Y-m-d' }}";
         var tomorrow = "{{ tomorrow }}"
-
+    
         swal({
             title: "Are you sure?",
             text: "You are about to make " + amenity + " reservation on " + today + " for the following hours: \n" + chosenHours + "\n" + tomorrow + ": ",
@@ -178,13 +178,31 @@ $(document).ready(function() {
         })
         .then((willReserve) => {
             if (willReserve) {
-                swal("Reservation successful!", {
-                    icon: "success",
+                $.ajax({
+                    type: "POST",
+                    url: "{% url 'make_reservation' %}",
+                    data: {
+                        'hours': chosenHours,
+                        'amenity_slug': "{{ object.amenity.slug }}",
+                        'amenity_date': today,
+                        'csrfmiddlewaretoken': '{{ csrf_token }}'
+                    },
+                    success: function(data) {
+                        if(data.status == "success") {
+                            swal("Reservation successful!", {
+                                icon: "success",
+                            })
+                            .then(() => {
+                                location.reload();
+                            });
+                        } else {
+                            swal("Sorry!", "At least one of the selected hours is no longer available. Please choose different hours.", "error")
+                                .then(() => {
+                                location.reload();
+                            });
+                        }
+                    }
                 });
-                // Submit the form
-                setTimeout(function() {
-                    $("form").submit();
-                }, 1000);
             } else {
                 swal("Your reservation has been cancelled.");
             }

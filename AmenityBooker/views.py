@@ -5,12 +5,46 @@ from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.generic import ListView
-from django.http import HttpResponseBadRequest, HttpResponseRedirect
+from django.http import HttpResponseBadRequest, HttpResponseRedirect, JsonResponse
 from django.urls import reverse
 
 from .models import Amenity, ReservationModel, Hour, UserReservation
 from .forms import ReservationForm
 from account.models import Profile
+
+
+@login_required
+def make_reservation(request):
+    if request.method == "POST":
+        user = request.user
+        amenity_slug = request.POST['amenity_slug']
+        amenity_date_str = request.POST['amenity_date']
+        amenity_date = datetime.strptime(amenity_date_str, '%Y-%m-%d').date()
+
+        selected_hours_str = request.POST['hours']
+        selected_hours = selected_hours_str.split(',')
+        reservation = ReservationModel.objects.get(amenity__slug=amenity_slug, date=amenity_date)
+
+        hours = Hour.objects.filter(start_end_time__in=selected_hours)
+
+        if len(hours) > 4:
+            return JsonResponse({"status": "failed", "message": "You cannot select more than 4 hour blocks."})
+
+        if not all(hour in reservation.hours_available_today.all() for hour in hours):
+            return JsonResponse({"status": "failed", "message": "One or more of the selected hours are not available."})
+
+        reservation.hours_booked_today.add(*hours)
+        reservation.hours_available_today.remove(*hours)
+        reservation.save()
+
+        try:
+            user_reservation = UserReservation.objects.create(user=user, amenity=reservation.amenity, date=amenity_date)
+            user_reservation.hours_booked.add(*hours)
+            user_reservation.save()
+            return JsonResponse({"status": "success"})
+        except Exception as e:
+            return JsonResponse({"status": "failed", "message": f"Reservation failed: {str(e)}"})
+
 
 @method_decorator(login_required, name='dispatch')
 class AmenitiesListView(ListView):

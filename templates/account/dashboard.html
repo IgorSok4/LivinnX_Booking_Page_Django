@@ -4,8 +4,8 @@
 
 {% block content %}
 <style>
-    p, h2, h4 {
-        color: black;
+    p, h1, h2, h3, h4 {
+        color: white;
         font-family: 'Bebas Neue', serif;
     }
     h5 {
@@ -17,12 +17,12 @@
         transition: 0.2s;
     }
     a:hover{
-        color: #51abac;
+        color: #ffffff;
     }
     body {
-        background: linear-gradient(45deg, #1e90ff, #4682b4, #87cefa, #add8e6, #ffffff);
+        background: linear-gradient(45deg, #0869a0, #4682b4, #87cefa, #063970, #154c79);
         background-size: 200% 200%;
-        animation: Gradient 10s ease infinite;
+        animation: Gradient 40s ease infinite;
         }
         @keyframes Gradient {
         0% {
@@ -40,8 +40,8 @@
     <div class="container py-4 py-xl-5" style="padding-top: 7rem!important;">
         <div class="row mb-5">
             <div class="col-md-8 col-xl-6 text-center mx-auto">
-                <h2>LivinnX announcements</h2>
-                <p>The latest announcements and posts from the building administration.</p>
+                <h1>LivinnX announcements</h1>
+                <h3>The latest announcements and posts from the building administration.</h3>
             </div>
         </div>
         <div class="row gy-4 row-cols-1 row-cols-md-2 row-cols-xl-3">
@@ -57,7 +57,7 @@
                     {% endwith %}
                     <div class="d-flex"><img class="flex-shrink-0 me-3 fit-cover" width="60" height="60" src="{{ post.author.profile.photo.url }}">
                         <div>
-                            <p class="fw-bold mb-0">{{ post.author }}</p>
+                            <p class="fw-bold mb-0" style="color: black;">{{ post.author }}</p>
                             <p class="text-muted mb-0">{{ post.published }}</p>
                         </div>
                     </div>
