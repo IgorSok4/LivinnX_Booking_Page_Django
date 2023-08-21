@@ -75,22 +75,32 @@ class AmenityDetailView(View):
         amenity_date_str = self.kwargs[self.date_url_kwarg]
         reservation = self.get_object(amenity_slug, amenity_date_str)
         today = datetime.today().date()
+        tomorrow = today + timedelta(days=1)
         user_active = user.active
 
-        user_reservations = UserReservation.objects.filter(user=request.user, 
+        user_reservations_today = UserReservation.objects.filter(user=request.user, 
                                                             date=today,
                                                             amenity__slug=amenity_slug)
-        
-        hours_booked = []
-        for res in user_reservations:
-            hours_booked.extend(list(res.hours_booked.all()))
+        hours_booked_today = []
+        for res in user_reservations_today:
+            hours_booked_today.extend(list(res.hours_booked.all()))
+            
+            
+        user_reservations_tomorrow = UserReservation.objects.filter(user=request.user, 
+                                                            date=tomorrow,
+                                                            amenity__slug=amenity_slug)
+        hours_booked_tomorrow = []
+        for res in user_reservations_tomorrow:
+            hours_booked_tomorrow.extend(list(res.hours_booked.all()))
+    
 
         context = {
             'object': reservation,
             'form': ReservationForm(),
             'tomorrow': reservation.date + timedelta(days=1),
             'today': today,
-            'hours_booked': hours_booked,
+            'hours_booked_today': hours_booked_today,
+            'hours_booked_tomorrow': hours_booked_tomorrow,
             'user_active': user_active,
         }
 

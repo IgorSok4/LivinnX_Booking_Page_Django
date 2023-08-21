@@ -45,6 +45,7 @@
 
 .hours_container div {
   margin: 10px;
+  margin-left: 60px;
 }
 
 .hours_container div label {
