@@ -34,6 +34,7 @@
             </div>
             <div class="col-md-4" style="margin-top: 43px;">
                 <h4 style="text-align: center; color: black;">{{ today|date:'Y-m-d' }}</h4>
+                <ul id="chosen-hours-list-today" style="display: none;"></ul>
                 <div class="hours_container">
                     <div>
                         {% for hour in object.hours_available_today.all %}
@@ -42,16 +43,29 @@
                             <span>{{ hour }}</span>
                         </label>
                         {% endfor %}
+                        {% for hour in object.hours_booked_today.all %}
+                        <label for="today-{{ hour }}"  class="disabled-label">
+                            <input type="checkbox" class="hour-checkbox today-checkbox disabled-checkbox" disabled>
+                            <span>{{ hour }}</span>
+                        </label>
+                        {% endfor %}
                     </div>
                 </div>
             </div>
             <div class="col-md-4" style="margin-top: 43px;">
                 <h4 style="text-align: center; color: black;">{{ tomorrow|date:'Y-m-d' }}</h4>
+                <ul id="chosen-hours-list-tomorrow" style="display: none;"></ul>
                 <div class="hours_container">
                     <div>
                         {% for hour in object.hours_available_tomorrow.all %}
                         <label for="tomorrow-{{ hour }}">
                             <input type="checkbox" id="tomorrow-{{ hour }}" name="{{ hour }}" class="hour-checkbox tomorrow-checkbox" value="{{ hour }}">
+                            <span>{{ hour }}</span>
+                        </label>
+                        {% endfor %}
+                        {% for hour in object.hours_booked_tomorrow.all %}
+                        <label for="tomorrow-{{ hour }}"  class="disabled-label">
+                            <input type="checkbox" class="hour-checkbox tomorrow-checkbox disabled-checkbox" disabled>
                             <span>{{ hour }}</span>
                         </label>
                         {% endfor %}
@@ -64,15 +78,13 @@
                         <h4 style="text-align: center;color: white;">Additional information</h4>
                         <p style="text-align: center;color: white;">{{ object.amenity.additional_info }}</p>
                     </div>
-                    <div class="col-md-4" style="color: white;">
-                        <h3>Choosen hours</h3>
-                        <ul id="chosen-hours-list">
-                        </ul>
-                    </div>
-                    <input type="hidden" name="hours" id="hidden-hours-input">
-                    <div class="col-md-4"><button class="btn btn-primary" data-toggle="modal" data-target="#exampleModal" type="submit">Make reservation</button></div>
+                    <input type="hidden" name="hours_today" id="hidden-hours-input-today">
+                    <input type="hidden" name="hours_tomorrow" id="hidden-hours-input-tomorrow">
+                    <div class="col-md-4" style><button class="btn btn-primary" data-toggle="modal" data-target="#exampleModal" style="margin-left: 135px;" type="submit">Make reservation</button></div>
                 </div>
             </div>
+        </div>
+    </div>
 </form>
 </section>
 {% endblock content %}
@@ -85,104 +97,88 @@ $(document).ready(function() {
     var amenity = "{{ object.amenity.name|lower }}";
     var today = "{{ today|date:'Y-m-d' }}";
     var tomorrow = "{{ tomorrow|date:'Y-m-d' }}";
-    var maxCheck;
+    var maxCheckToday = 4 - userHoursBookedToday;
+    var maxCheckTomorrow = 4 - userHoursBookedTomorrow;
 
-    if (user_active) {
-        maxCheck = 4 - userHoursBookedToday;
-        if(userHoursBookedToday === 4) {
-            maxCheck = 0;
-            swal({
-                title: "Reservation Limit Reached",
-                text: "You cannot make any more reservations for " + amenity + " today(" + today + ").",
-                icon: "error",
-                customClass: {
-                    container: "center-text",
-                },
-            });
-        }
-    } else {
-        $("section").addClass("no-interaction");
-        maxCheck = 0;
+    function showSwal(title, text) {
         swal({
-            title: "User Not Active",
-            text: "You are not an active user and cannot interact with this content.",
+            title: title,
+            text: text,
             icon: "error",
-            buttons: false,
+            customClass: {
+                container: "center-text",
+            },
         });
+    }
+
+    if (!user_active) {
+        $("section").addClass("no-interaction");
+        showSwal("User Not Active", "You are not an active user and cannot interact with this content.");
+    } else if (userHoursBookedToday >= 4) {
+        maxCheckToday = 0;
+        showSwal("Reservation for " + today + " Limit Reached", "You cannot make any more reservations for " + amenity + " for " + today + ".");
+    } else if (userHoursBookedTomorrow >= 4) {
+        maxCheckTomorrow = 0;
+        showSwal("Reservation for " + tomorrow + " Limit Reached", "You cannot make any more reservations for " + amenity + " for " + tomorrow + ".");
     }
 
     var checkboxes = $('.hour-checkbox');
     var reserveButton = $('.btn-primary');
 
-    if(checkboxes.filter(':checked').length === 0) {
+    if (checkboxes.filter(':checked').length === 0) {
         reserveButton.prop('disabled', true);
         reserveButton.addClass('btn-secondary');
         reserveButton.removeClass('btn-primary');
     }
 
     checkboxes.change(function() {
-        var currentCheck = checkboxes.filter(':checked').length;
+        var currentCheckToday = $('.today-checkbox:checked').length;
+        var currentCheckTomorrow = $('.tomorrow-checkbox:checked').length;
 
-        if(currentCheck > 0) {
-            reserveButton.prop('disabled', false);
-            reserveButton.addClass('btn-primary');
-            reserveButton.removeClass('btn-secondary');
-        } else {
-            reserveButton.prop('disabled', true);
-            reserveButton.addClass('btn-secondary');
-            reserveButton.removeClass('btn-primary');
-        }
+        reserveButton.prop('disabled', checkboxes.filter(':checked').length === 0);
+        reserveButton.toggleClass('btn-secondary', checkboxes.filter(':checked').length === 0);
+        reserveButton.toggleClass('btn-primary', checkboxes.filter(':checked').length > 0);
 
-        if(currentCheck > maxCheck){
-            swal("Max Selection Limit", "You can select a maximum of " + maxCheck + " time blocks.", "warning");
+        if (currentCheckToday > maxCheckToday) {
             $(this).prop('checked', false);
-            currentCheck--;
+            showSwal("Max Selection Limit", "On " + today + " you can select a maximum of " + maxCheckToday + " time blocks");
+        } else if (currentCheckTomorrow > maxCheckTomorrow) {
+            $(this).prop('checked', false);
+            showSwal("Max Selection Limit", "On " + tomorrow + " you can select a maximum of " + maxCheckTomorrow + " time blocks");
         }
-        
-            var chosenHoursList = $("#chosen-hours-list");
-        
-            chosenHoursList.find('li:contains("' + $(this).val() + '")').remove();
-        
-            if ($(this).is(':checked')) {
-                chosenHoursList.append('<li>' + $(this).val() + '</li>');
-            }
-    
 
-            // preparing list with comma separated hours for UserReservation model
-            var chosenHoursArray = [];
-
-            checkboxes.each(function() {
-                if ($(this).is(':checked')) {
-                    chosenHoursArray.push($(this).val());
-                }
-            });
-
-            // join chosen hours together
-            $('#hidden-hours-input').val(chosenHoursArray.join(','));
-        });
+        var chosenHoursArrayToday = $('.today-checkbox:checked').map(function() {
+            return $(this).val();
+        }).toArray();
+        $('#hidden-hours-input-today').val(chosenHoursArrayToday.join(','));
+        
+        var chosenHoursArrayTomorrow = $('.tomorrow-checkbox:checked').map(function() {
+            return $(this).val();
+        }).toArray();
+        $('#hidden-hours-input-tomorrow').val(chosenHoursArrayTomorrow.join(','));
     });
+
     $('#regulations-btn').click(function(e) {
         e.preventDefault();
-
         var regulations = "{{ object.amenity.regulations|escapejs }}";
-        
         swal({
             title: "Regulations",
             text: regulations,
             icon: "info",
         });
     });
+
     $('.btn-primary').click(function(e) {
         e.preventDefault();
-    
-        var amenity = "{{ object.amenity.name }}";
-        var chosenHours = $('#hidden-hours-input').val();
-        var today = "{{ today|date:'Y-m-d' }}";
-        var tomorrow = "{{ tomorrow }}"
-    
+
+        var chosenHoursToday = $('#hidden-hours-input-today').val();
+        var chosenHoursTomorrow = $('#hidden-hours-input-tomorrow').val();
+        
         swal({
             title: "Are you sure?",
-            text: "You are about to make " + amenity + " reservation on " + today + " for the following hours: \n" + chosenHours + "\n" + tomorrow + ": ",
+            text: "You are about to make a reservation for " + amenity + 
+                  "\n On " + today + " for the following hours: \n" + chosenHoursToday +
+                  "\n And on " + tomorrow + " for the following hours: \n" + chosenHoursTomorrow,
             icon: "warning",
             buttons: true,
             dangerMode: true,
@@ -193,21 +189,21 @@ $(document).ready(function() {
                     type: "POST",
                     url: "{% url 'make_reservation' %}",
                     data: {
-                        'hours': chosenHours,
+                        'hours_today': chosenHoursToday,
+                        'hours_tomorrow': chosenHoursTomorrow,
                         'amenity_slug': "{{ object.amenity.slug }}",
                         'amenity_date': today,
                         'csrfmiddlewaretoken': '{{ csrf_token }}'
                     },
                     success: function(data) {
-                        if(data.status == "success") {
+                        if (data.status == "success") {
                             swal("Reservation successful!", {
                                 icon: "success",
-                            })
-                            .then(() => {
+                            }).then(() => {
                                 location.reload();
                             });
                         } else {
-                            swal("Sorry!", "At least one of the selected hours is no longer available. Please choose different hours.", "error")
+                            showSwal("Sorry!", "At least one of the selected hours is no longer available. Please choose different hours.")
                                 .then(() => {
                                 location.reload();
                             });
@@ -219,6 +215,7 @@ $(document).ready(function() {
             }
         });
     });
+});
 </script>
 {% endblock extra_js %}
 <style>

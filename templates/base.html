@@ -89,7 +89,6 @@
     <script src="{% static 'js/Simple-Slider-swiper-bundle.min.js' %}"></script>
     <script src="{% static 'js/Simple-Slider.js' %}"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="{% static 'js/choosen-hours.js' %}"></script>
     <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
 
@@ -101,7 +100,7 @@
         window.addEventListener('scroll', function() {
             var scrollTop = window.pageYOffset || document.documentElement.scrollTop;
 
-            if (scrollTop > 100) { // Dodane sprawdzenie, czy przewinięto o więcej niż 100 pikseli
+            if (scrollTop > 100) {
                 if (scrollTop > lastScrollTop) {
                     navbar.classList.add('nav-up');
                 } else {

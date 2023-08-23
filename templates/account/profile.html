@@ -67,7 +67,7 @@
                 <div class="row">
                     <div class="col-md-6 offset-md-3">
                         <div id="faqlist" class="accordion accordion-flush">
-                            {% for reservation in user_reservations|slice:":20" %}
+                            {% for reservation in user_reservations|slice:":10" %}
                             {% if reservation.date != todays_date and reservation.date != tomorrows_date %}
                             <div class="accordion-item">
                                 <h2 class="accordion-header"><button class="btn accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#content-accordion-past-{{ forloop.counter }}" style="font-family: 'Bebas Neue'">{{ reservation.amenity }} | #{{ reservation.id }} | 

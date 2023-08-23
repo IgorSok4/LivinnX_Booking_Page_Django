@@ -13,39 +13,69 @@ from .forms import ReservationForm
 from account.models import Profile
 
 
+def process_reservation(user, amenity_slug, amenity_date_str, selected_hours_str_today, selected_hours_str_tomorrow):
+
+    amenity_date = datetime.strptime(amenity_date_str, '%Y-%m-%d').date()
+
+    selected_hours_today = selected_hours_str_today.split(',')
+    selected_hours_tomorrow = selected_hours_str_tomorrow.split(',')
+
+    if len(selected_hours_today) > 4:
+        return {"status": "failed", "message": "You cannot select more than 4 hour blocks for today."}
+
+    if len(selected_hours_tomorrow) > 4:
+        return {"status": "failed", "message": "You cannot select more than 4 hour blocks for tomorrow."}
+
+    # Handle reservation for today
+    if selected_hours_today:
+        reservation_today = ReservationModel.objects.filter(amenity__slug=amenity_slug, date=amenity_date).first()
+        
+        if reservation_today:
+            hours_today = Hour.objects.filter(start_end_time__in=selected_hours_today)
+            if not all(hour in reservation_today.hours_available_today.all() for hour in hours_today):
+                return {"status": "failed", "message": "One or more of the selected hours for today are not available."}
+            reservation_today.hours_booked_today.add(*hours_today)
+            reservation_today.hours_available_today.remove(*hours_today)
+            reservation_today.save()
+            user_reservation_today = UserReservation.objects.create(user=user, amenity=reservation_today.amenity, date=amenity_date)
+            for hour in hours_today:
+                user_reservation_today.hours_booked.add(hour)
+
+    # Handle reservation for tomorrow
+    if selected_hours_tomorrow:
+        amenity_date_tomorrow = amenity_date + timedelta(days=1)
+        reservation_tomorrow = ReservationModel.objects.filter(amenity__slug=amenity_slug, date=amenity_date).first()
+        print(f"godziny jutrzejsze {selected_hours_tomorrow}")
+
+        if reservation_tomorrow:
+            hours_tomorrow = Hour.objects.filter(start_end_time__in=selected_hours_tomorrow)
+            if not all(hour in reservation_tomorrow.hours_available_tomorrow.all() for hour in hours_tomorrow):
+                return {"status": "failed", "message": "One or more of the selected hours for tomorrow are not available."}
+            reservation_tomorrow.hours_booked_tomorrow.add(*hours_tomorrow)
+            reservation_tomorrow.hours_available_tomorrow.remove(*hours_tomorrow)
+            reservation_tomorrow.save()
+            user_reservation_tomorrow = UserReservation.objects.create(user=user, amenity=reservation_tomorrow.amenity, date=amenity_date_tomorrow)
+            for hour in hours_tomorrow:
+                user_reservation_tomorrow.hours_booked.add(hour)
+                
+    return {"status": "success"}
+
+
+
+
 @login_required
 def make_reservation(request):
     if request.method == "POST":
-        user = request.user
-        amenity_slug = request.POST['amenity_slug']
-        amenity_date_str = request.POST['amenity_date']
-        amenity_date = datetime.strptime(amenity_date_str, '%Y-%m-%d').date()
-
-        selected_hours_str = request.POST['hours']
-        selected_hours = selected_hours_str.split(',')
-        reservation = ReservationModel.objects.get(amenity__slug=amenity_slug, date=amenity_date)
-
-        hours = Hour.objects.filter(start_end_time__in=selected_hours)
-
-        if len(hours) > 4:
-            return JsonResponse({"status": "failed", "message": "You cannot select more than 4 hour blocks."})
-
-        if not all(hour in reservation.hours_available_today.all() for hour in hours):
-            return JsonResponse({"status": "failed", "message": "One or more of the selected hours are not available."})
-
-        reservation.hours_booked_today.add(*hours)
-        reservation.hours_available_today.remove(*hours)
-        reservation.save()
-
-        try:
-            user_reservation = UserReservation.objects.create(user=user, amenity=reservation.amenity, date=amenity_date)
-            user_reservation.hours_booked.add(*hours)
-            user_reservation.save()
-            return JsonResponse({"status": "success"})
-        except Exception as e:
-            return JsonResponse({"status": "failed", "message": f"Reservation failed: {str(e)}"})
-
-
+        response = process_reservation(
+            user=request.user,
+            amenity_slug=request.POST['amenity_slug'],
+            amenity_date_str=request.POST['amenity_date'],
+            selected_hours_str_today=request.POST['hours_today'],
+            selected_hours_str_tomorrow=request.POST['hours_tomorrow']
+        )
+        return JsonResponse(response)
+    
+    
 @method_decorator(login_required, name='dispatch')
 class AmenitiesListView(ListView):
     template_name = 'reservation/amenity_list.html'
@@ -57,8 +87,9 @@ class AmenitiesListView(ListView):
         today = datetime.today().date()
         context['today'] = today
         return context
-
-
+    
+    
+    
 @method_decorator(login_required, name='dispatch')
 class AmenityDetailView(View):
     template_name = 'reservation/reservation_detail.html'
@@ -105,44 +136,22 @@ class AmenityDetailView(View):
         }
 
         return render(request, self.template_name, context)
-        
+    
     def post(self, request, *args, **kwargs):
-        user = request.user
-        amenity_slug = self.kwargs['amenity_slug']
-        amenity_date_str = self.kwargs['amenity_date']
-        amenity_date = datetime.strptime(amenity_date_str, '%Y-%m-%d').date()
-
-        # get the hours from the form submission
-        selected_hours_str = request.POST['hours']
-        selected_hours = selected_hours_str.split(',')
-        # retrieve the relevant ReservationModel
-        reservation = ReservationModel.objects.get(amenity__slug=amenity_slug, date=amenity_date)
-
-        # retrieve the hours instances based on the submitted hours
-        hours = Hour.objects.filter(start_end_time__in=selected_hours)
-
-        # check amount of hour blocks that user has booked already
-        if len(hours) > 4:
-            return HttpResponseBadRequest('You cannot select more than 4 hour blocks.')
-
-        # check if all selected hours are available
-        if not all(hour in reservation.hours_available_today.all() for hour in hours):
-            return HttpResponseBadRequest('One or more of the selected hours are not available.')
-
-        # book the hours
-        reservation.hours_booked_today.add(*hours)
-        reservation.hours_available_today.remove(*hours)
-        reservation.save()
-
-        # add user reservation
-        try:
-            user_reservation = UserReservation.objects.create(user=user, amenity=reservation.amenity, date=amenity_date)
-            user_reservation.hours_booked.add(*hours)
-            user_reservation.save()
+        response = process_reservation(
+            user=request.user,
+            amenity_slug=self.kwargs['amenity_slug'],
+            amenity_date_str=self.kwargs['amenity_date'],
+            selected_hours_str_today=request.POST['hours_today'],
+            selected_hours_str_tomorrow=request.POST['hours_tomorrow']
+        )
+        
+        if response["status"] == "success":
             messages.success(request, "Your reservation was successful.")
-        except Exception as e:
-            messages.error(request, f"Reservation failed: {e}")
-
-        return HttpResponseRedirect(reverse('amenity_detail', args=[amenity_slug, amenity_date_str]))
-
-
+            return HttpResponseRedirect(reverse('amenity_detail', args=[self.kwargs['amenity_slug'], self.kwargs['amenity_date']]))
+        else:
+            messages.error(request, response["message"])
+            return HttpResponseBadRequest(response["message"])
+    
+    
+    

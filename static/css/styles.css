@@ -87,3 +87,13 @@
   color: #fff;
   box-shadow: 0 2px 20px #c21655;
 }
+
+.container .hours_container .disabled-label span {
+  color: rgb(39, 38, 38);
+  background-color: #928f8f;  /* Jeśli chcesz również zmienić kolor tła */
+  cursor: not-allowed;
+}
+
+.container .hours_container div label .disabled-checkbox:disabled {
+    background-color: #e5e5e5;
+}

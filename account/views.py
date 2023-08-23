@@ -66,8 +66,12 @@ def reservation_delete(request, reservation_id):
             reservation_model = ReservationModel.objects.get(date=reservation.date, amenity=reservation.amenity)
             for hour in hours_to_return:
                 reservation_model.hours_available_today.add(hour)
+                reservation_model.hours_booked_today.remove(hour)
             reservation.delete()
-            return redirect('profile')
+            return redirect('user_profile')
+        
+        
+        # TO DO: Handle deleting tomorrows reservation
 
     
 @login_required
