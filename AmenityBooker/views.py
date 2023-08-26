@@ -17,8 +17,8 @@ def process_reservation(user, amenity_slug, amenity_date_str, selected_hours_str
 
     amenity_date = datetime.strptime(amenity_date_str, '%Y-%m-%d').date()
 
-    selected_hours_today = selected_hours_str_today.split(',')
-    selected_hours_tomorrow = selected_hours_str_tomorrow.split(',')
+    selected_hours_today = [hour for hour in selected_hours_str_today.split(',') if hour]
+    selected_hours_tomorrow = [hour for hour in selected_hours_str_tomorrow.split(',') if hour]
 
     if len(selected_hours_today) > 4:
         return {"status": "failed", "message": "You cannot select more than 4 hour blocks for today."}
@@ -27,7 +27,7 @@ def process_reservation(user, amenity_slug, amenity_date_str, selected_hours_str
         return {"status": "failed", "message": "You cannot select more than 4 hour blocks for tomorrow."}
 
     # Handle reservation for today
-    if selected_hours_today:
+    if len(selected_hours_today) > 0:
         reservation_today = ReservationModel.objects.filter(amenity__slug=amenity_slug, date=amenity_date).first()
         
         if reservation_today:
@@ -42,11 +42,9 @@ def process_reservation(user, amenity_slug, amenity_date_str, selected_hours_str
                 user_reservation_today.hours_booked.add(hour)
 
     # Handle reservation for tomorrow
-    if selected_hours_tomorrow:
+    if len(selected_hours_tomorrow) > 0:
         amenity_date_tomorrow = amenity_date + timedelta(days=1)
         reservation_tomorrow = ReservationModel.objects.filter(amenity__slug=amenity_slug, date=amenity_date).first()
-        print(f"godziny jutrzejsze {selected_hours_tomorrow}")
-
         if reservation_tomorrow:
             hours_tomorrow = Hour.objects.filter(start_end_time__in=selected_hours_tomorrow)
             if not all(hour in reservation_tomorrow.hours_available_tomorrow.all() for hour in hours_tomorrow):

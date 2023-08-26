@@ -62,13 +62,23 @@ def reservation_delete(request, reservation_id):
     reservation = get_object_or_404(UserReservation, id=reservation_id)
     if request.user == reservation.user:
         if request.method == "POST":
+            today_date = datetime.today().date()  # Pobierz aktualną datę
             hours_to_return = reservation.hours_booked.all()
-            reservation_model = ReservationModel.objects.get(date=reservation.date, amenity=reservation.amenity)
-            for hour in hours_to_return:
-                reservation_model.hours_available_today.add(hour)
-                reservation_model.hours_booked_today.remove(hour)
+            reservation_model = ReservationModel.objects.get(date=today_date, amenity=reservation.amenity)
+            
+            if reservation.date == today_date:
+                for hour in hours_to_return:
+                    reservation_model.hours_available_today.add(hour)
+                    reservation_model.hours_booked_today.remove(hour)
+                    
+            elif reservation.date == today_date + timedelta(days=1):
+                for hour in hours_to_return:
+                    reservation_model.hours_available_tomorrow.add(hour)
+                    reservation_model.hours_booked_tomorrow.remove(hour)
+
             reservation.delete()
             return redirect('user_profile')
+
         
         
         # TO DO: Handle deleting tomorrows reservation
