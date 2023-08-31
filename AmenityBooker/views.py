@@ -102,10 +102,13 @@ class AmenityDetailView(View):
         user = Profile.objects.get(user=request.user)
         amenity_slug = self.kwargs[self.slug_url_kwarg]
         amenity_date_str = self.kwargs[self.date_url_kwarg]
+        amenity = Amenity.objects.get(slug=amenity_slug)
         reservation = self.get_object(amenity_slug, amenity_date_str)
         today = datetime.today().date()
         tomorrow = today + timedelta(days=1)
         user_active = user.active
+        amenity_active_attribute = f"{amenity_slug}_active"
+        user_active_amenity = getattr(user, amenity_active_attribute)
 
         user_reservations_today = UserReservation.objects.filter(user=request.user, 
                                                             date=today,
@@ -125,12 +128,14 @@ class AmenityDetailView(View):
 
         context = {
             'object': reservation,
+            'amenity': amenity,
             'form': ReservationForm(),
             'tomorrow': reservation.date + timedelta(days=1),
             'today': today,
             'hours_booked_today': hours_booked_today,
             'hours_booked_tomorrow': hours_booked_tomorrow,
             'user_active': user_active,
+            'user_active_amenity': user_active_amenity,
         }
 
         return render(request, self.template_name, context)

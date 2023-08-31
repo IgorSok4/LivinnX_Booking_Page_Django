@@ -80,7 +80,7 @@
                     </div>
                     <input type="hidden" name="hours_today" id="hidden-hours-input-today">
                     <input type="hidden" name="hours_tomorrow" id="hidden-hours-input-tomorrow">
-                    <div class="col-md-4" style><button class="btn btn-primary" data-toggle="modal" data-target="#exampleModal" style="margin-left: 135px;" type="submit">Make reservation</button></div>
+                    <div class="col-md-4" style><button class="btn btn-primary make-reservation-btn" data-toggle="modal" data-target="#exampleModal" style="margin-left: 135px;" type="submit">Make reservation</button></div>
                 </div>
             </div>
         </div>
@@ -91,10 +91,12 @@
 {% block extra_js %}
 <script>
 $(document).ready(function() {
+    var amenity = "{{ object.amenity.name|lower }}";
+    var amenityAvailable = {{ amenity.available|yesno:"1,0" }};
     var userHoursBookedToday = {{ hours_booked_today|length }};
     var userHoursBookedTomorrow = {{ hours_booked_tomorrow|length }};
-    var user_active = {{ user_active|yesno:"1,0" }};
-    var amenity = "{{ object.amenity.name|lower }}";
+    var userActive = {{ user_active|yesno:"1,0" }};
+    var userActiveAmenity = {{ user_active_amenity|yesno:"1,0" }};
     var today = "{{ today|date:'Y-m-d' }}";
     var tomorrow = "{{ tomorrow|date:'Y-m-d' }}";
     var maxCheckToday = 4 - userHoursBookedToday;
@@ -105,15 +107,24 @@ $(document).ready(function() {
             title: title,
             text: text,
             icon: "error",
+            button: false,
             customClass: {
                 container: "center-text",
             },
         });
     }
 
-    if (!user_active) {
+    if (!amenityAvailable) {
+        $("section").addClass("no-interaction");
+        showSwal("Amenity Not Active", "This amenity is temporarily unavailable.\nPlease contact the administrative office for assistance.");
+    } else if (!userActive) {
         $("section").addClass("no-interaction");
         showSwal("User Not Active", "You are not an active user and cannot interact with this content.");
+    } else if (!userActiveAmenity) {
+        maxCheckToday = 0;
+        maxCheckTomorrow = 0;
+        $("section").addClass("no-interaction");
+        showSwal("Amenity Not Available", "This amenity is not available for you. Please contact the administration office.");
     } else if (userHoursBookedToday >= 4) {
         maxCheckToday = 0;
         showSwal("Reservation for " + today + " Limit Reached", "You cannot make any more reservations for " + amenity + " for " + today + ".");
@@ -167,12 +178,19 @@ $(document).ready(function() {
             icon: "info",
         });
     });
-
-    $('.btn-primary').click(function(e) {
+    $('.make-reservation-btn').click(function(e) {
         e.preventDefault();
 
         var chosenHoursToday = $('#hidden-hours-input-today').val();
         var chosenHoursTomorrow = $('#hidden-hours-input-tomorrow').val();
+
+        if(chosenHoursToday === "") {
+            chosenHoursToday = "No hours choosen."
+        }
+
+        if(chosenHoursTomorrow === "") {
+            chosenHoursTomorrow = "No hours choosen."
+        }
         
         swal({
             title: "Are you sure?",
