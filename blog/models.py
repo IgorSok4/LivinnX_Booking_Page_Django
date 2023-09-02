@@ -64,3 +64,12 @@ class Post(models.Model):
         
     def __str__(self):
         return self.title
+
+    def get_color(self):
+        colors = {
+            "technical": "#f99448",
+            "community": "#044f8d",
+            "event": "#802a77",
+            "important": "#ff0000",
+        }
+        return colors.get(self.type, "#2596be")

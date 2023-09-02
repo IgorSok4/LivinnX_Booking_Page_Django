@@ -39,7 +39,7 @@ def dashboard(request):
     return render(request,
                   'account/dashboard.html',
                   {'section': 'dashboard',
-                   'latest_posts': Post.objects.filter(status="published")[:3]})
+                   'latest_posts': Post.objects.filter(status="published")[:12]})
     
     
 @login_required
