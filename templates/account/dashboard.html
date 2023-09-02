@@ -47,8 +47,8 @@
         <div class="row gy-4 row-cols-1 row-cols-md-2 row-cols-xl-3">
             {% for post in latest_posts %}
             <div class="col">
-                <div class="p-4"><span class="badge rounded-pill bg-primary mb-2" style="background: #51abac!important">
-                    {{ post.type|title }}</span>
+                <div class="p-4">
+                    <span class="badge rounded-pill" style="background: {{ post.get_color }}!important">{{ post.type|title }}</span>
                     <h2><a href="{% url 'post_detail' slug=post.slug %}">{{ post.title }}</a></h2>
                     {% with post.body_en as text %}
                     <h5>{{ text|slice:":200" }}
@@ -64,40 +64,6 @@
                 </div>
             </div>
             {% endfor %}
-        </div>
-    </div>
-    <div class="container d-flex flex-column align-items-center py-4 py-xl-5">
-        <div class="row gy-4 row-cols-1 row-cols-md-2 w-100" style="max-width: 800px;">
-            <div class="col order-md-first">
-                <div class="card"><img class="card-img w-100 d-block" src="https://cdn.bootstrapstudio.io/placeholders/1400x800.png">
-                    <div class="card-img-overlay text-center d-flex flex-column justify-content-center align-items-center p-4">
-                        <h4>Title</h4>
-                        <p>Volutpat habitasse risus posuere, commodo fusce donec. Turpis donec tristique.</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col d-md-flex order-first justify-content-md-start align-items-md-end order-md-1">
-                <div style="width: 80%;">
-                    <h2>Litora vivamus dui, nam aliquam aenean</h2>
-                    <p>Curae hendrerit donec commodo hendrerit egestas tempus, turpis facilisis nostra nunc. Vestibulum dui eget ultrices.</p>
-                </div>
-            </div>
-            <div class="col order-md-2">
-                <div class="card"><img class="card-img w-100 d-block" src="https://cdn.bootstrapstudio.io/placeholders/1400x800.png">
-                    <div class="card-img-overlay text-center d-flex flex-column justify-content-center align-items-center p-4">
-                        <h4>Title</h4>
-                        <p>Volutpat habitasse risus posuere, commodo fusce donec. Turpis donec tristique.</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col order-md-2">
-                <div class="card"><img class="card-img w-100 d-block" src="https://cdn.bootstrapstudio.io/placeholders/1400x800.png">
-                    <div class="card-img-overlay text-center d-flex flex-column justify-content-center align-items-center p-4">
-                        <h4>Title</h4>
-                        <p>Volutpat habitasse risus posuere, commodo fusce donec. Turpis donec tristique.</p>
-                    </div>
-                </div>
-            </div>
         </div>
     </div>
 </section>
