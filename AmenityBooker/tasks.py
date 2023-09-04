@@ -2,6 +2,7 @@ from celery import shared_task
 from datetime import date, timedelta
 from AmenityBooker.models import ReservationModel, Amenity
 
+
 @shared_task
 def create_daily_reservations():
     all_amenities = Amenity.objects.all()
@@ -25,3 +26,14 @@ def create_daily_reservations():
             else:
                 reservation_today.hours_available_today.set(available_hours)
                 reservation_today.hours_available_tomorrow.set(available_hours)
+                
+                
+"""Helper tasks for integration tests."""
+@shared_task()
+def ping():
+    # type: () -> str
+    """Simple task that just returns 'pong'."""
+    print('pong')
+
+
+

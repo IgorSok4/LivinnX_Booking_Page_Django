@@ -6,8 +6,4 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'LivinnX_Amenity_Booker.settings
 
 app = Celery('LivinnX_Amenity_Booker')
 app.config_from_object('django.conf:settings', namespace='CELERY')
-app.autodiscover_tasks(lambda: settings.INSTALLED_APPS)
-
-@app.task(bind=True)
-def debug_task(self):
-    print('Request: {0!r}'.format(self.request))
+app.autodiscover_tasks()

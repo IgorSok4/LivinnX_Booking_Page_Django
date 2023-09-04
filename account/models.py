@@ -7,7 +7,8 @@ class Profile(models.Model):
     active = models.BooleanField(default=False)
     sauna_active = models.BooleanField(default=True)
     jacuzzi_active = models.BooleanField(default=True)
-    conference_active = models.BooleanField(default=True)
+    orange_active = models.BooleanField(default=True)
+    blue_active = models.BooleanField(default=True)
     music_active = models.BooleanField(default=True)
     art_active = models.BooleanField(default=True)
     photo = models.ImageField(upload_to='users/%Y/%m/%d',
