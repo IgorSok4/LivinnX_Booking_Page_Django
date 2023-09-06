@@ -6,19 +6,19 @@
 {% block content %}
 <form method="post" action="">
 {% csrf_token %}
+<style>
+    .swal-overlay {
+        background-color: rgba(0, 0, 0, 0);
+    }
+    .swal-title {
+        font-family: 'Bebas Neue'; 
+    }
+    .no-interaction {
+        pointer-events: none;
+        opacity: 0.3;
+    }
+</style>
 <section style="background: linear-gradient(#ffffff, rgb(220,121,157) 58%, #c21655 99%);">
-    <style>
-        .swal-overlay {
-          background-color: rgba(0, 0, 0, 0);
-        }
-        .swal-title {
-            font-family: 'Bebas Neue'; 
-        }
-        .no-interaction {
-            pointer-events: none;
-            opacity: 0.3;
-        }
-    </style>
     <div class="container" style="padding-top: 8rem!important;">
         <div class="row">
             <div class="col-md-12" style="margin-top: 84px;height: 194px;">
@@ -183,14 +183,6 @@ $(document).ready(function() {
 
         var chosenHoursToday = $('#hidden-hours-input-today').val();
         var chosenHoursTomorrow = $('#hidden-hours-input-tomorrow').val();
-
-        if(chosenHoursToday === "") {
-            chosenHoursToday = "No hours choosen."
-        }
-
-        if(chosenHoursTomorrow === "") {
-            chosenHoursTomorrow = "No hours choosen."
-        }
         
         swal({
             title: "Are you sure?",

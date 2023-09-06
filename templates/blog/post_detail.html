@@ -18,6 +18,10 @@
         color: black;
         font-family: 'MyriadPro', sans-serif;
     }
+    legend {
+        font-family: 'Bebas Neue', serif;
+        color: black;
+    }
     a {
         text-decoration: none;
         color: black;
@@ -25,6 +29,12 @@
     }
     a:hover {
         color: #51abac;
+    }
+    .glass-container {
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 10px;
+        padding: 20px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     }
     body {
         background: linear-gradient(45deg, #0869a0, #4682b4, #87cefa, #063970, #154c79);
@@ -45,9 +55,9 @@
 </style>
 <section>
     <div class="container py-4 py-xl-5" style="padding-top: 10rem!important;">
-        <div class="row gy-4 row-cols-1 row-cols-md-2 row-cols-xl-3" style="background: white;border-radius: 20px;padding-bottom:20px;">
+        <div class="row gy-4 row-cols-1 row-cols-md-2 row-cols-xl-3 glass-container">
         <div class="col">
-            <img id="postImage" width="100" height="80" style="width: 350px;height: 341px;object-fit: cover;border-radius: 20px;margin-bottom: 50px;margin-left: 10px;" src="{{ post.image.url }}">
+            <img id="postImage" width="100" height="80" style="width: 350px;height: 341px;object-fit: cover;border-radius: 10px;margin-bottom: 50px;margin-left: 10px;" src="{{ post.image.url }}">
             <div style="margin-bottom:100px;">
                 <a href="{{ post.file.doc.url }}"></a>
                 {% if next_post %}
@@ -90,7 +100,7 @@
             </div>
             <div class="col">
                 <fieldset>
-                    <legend style="font-family: 'Bebas Neue', serif;">Attachments</legend>
+                    <legend>Attachments</legend>
                     <ul>
                         {% if post.file %}
                         <a href="{{ post.file.doc.url }}">Download attachments</a>
