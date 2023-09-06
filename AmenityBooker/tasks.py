@@ -23,6 +23,7 @@ def create_daily_reservations():
             if previous_reservation: 
                 reservation_today.hours_available_today.set(previous_reservation.hours_available_tomorrow.all())
                 reservation_today.hours_booked_today.set(previous_reservation.hours_booked_tomorrow.all())
+                reservation_today.hours_available_tomorrow.set(available_hours)
             else:
                 reservation_today.hours_available_today.set(available_hours)
                 reservation_today.hours_available_tomorrow.set(available_hours)

@@ -12,8 +12,6 @@ from .models import Amenity, ReservationModel, Hour, UserReservation
 from .forms import ReservationForm
 from account.models import Profile
 
-from .tasks import ping
-
 
 def process_reservation(user, amenity_slug, amenity_date_str, selected_hours_str_today, selected_hours_str_tomorrow):
 

@@ -3,3 +3,11 @@
 /settings.py
 /.idea
 
+db.sqlite3
+AmenityBooker/__pycache__/tasks.cpython-310.pyc
+AmenityBooker/__pycache__/views.cpython-310.pyc
+LivinnX_Amenity_Booker/__pycache__/settings.cpython-310.pyc
+LivinnX_Amenity_Booker/__pycache__/settings.cpython-310.pyc
+celerybeat-schedule.bak
+celerybeat-schedule.dat
+celerybeat-schedule.dir
