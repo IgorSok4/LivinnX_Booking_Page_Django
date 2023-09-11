@@ -1,0 +1,52 @@
+{% extends 'admin_base.html' %}
+
+{% block title %}LivinnX Amenity Booker Login{% endblock title %}
+
+{% block content %}
+<style>
+    body {
+        background: linear-gradient(45deg, #0869a0, #4682b4, #87cefa, #063970, #154c79);
+        background-size: 200% 200%;
+        animation: Gradient 40s ease infinite;
+        }
+        @keyframes Gradient {
+        0% {
+            background-position: 0% 50%;
+        }
+        50% {
+            background-position: 100% 50%;
+        }
+        100% {
+            background-position: 0% 50%;
+        }
+        }
+</style>
+<section class="py-4 py-xl-5">
+    <section class="py-4 py-xl-5" style="padding-top: 0rem!important;">
+        <div class="container">
+            <div class="row d-flex justify-content-center" style="margin-top: 150px;">
+                <div class="col-md-6 col-xl-4">
+                    <div class="card mb-5">
+                        <div class="card-body d-flex flex-column align-items-center" style="background: #f8f9fa;border-color: rgb(0,0,0);">
+                            <div class="bs-icon-xl bs-icon-circle bs-icon-primary bs-icon my-4" style="background: url(/static/img/1-people.png) bottom / auto no-repeat, rgb(81,171,172);"></div>
+                            {% if form.errors %}
+                                <p>Wrong username or password! 
+                                    Try again.</p>
+                            {% else %}
+                                <h4>STAFF LOGIN PANEL</h4>
+                            {% endif %}
+                            <form action='{% url 'admin_login' %}'class="text-center" method="post">
+                                {% csrf_token %}
+                                <div class="mb-3">{{ form.as_p }}</div>
+                                {% comment %} <div class="mb-3"><input class="form-control" type="password" name="password" placeholder="Password"></div> {% endcomment %}
+                                <input type="hidden" name="next" value="{{ next }}" />
+                                <div class="mb-3"><button class="btn btn-primary d-block w-100" type="submit" style="border-color: rgb(255,255,255);font-family: 'Bebas Neue', serif;">Login</button></div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</section>
+{% endblock content %}

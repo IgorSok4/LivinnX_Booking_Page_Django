@@ -19,11 +19,12 @@ from django.conf import settings
 from django.conf.urls.static import static
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
     path('', include('startpage.urls')),
     path('account/', include('account.urls')),
     path('blog/', include('blog.urls')),
     path('reservations/', include('AmenityBooker.urls')),
+    path('admin/', include('management_panel.urls')),
+    path('dj-admin/', admin.site.urls),
 ]
 
 if settings.DEBUG:

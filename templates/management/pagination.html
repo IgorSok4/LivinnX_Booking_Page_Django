@@ -1,0 +1,12 @@
+{% load static %}
+<nav>
+    <ul class="pagination pagination-sm mb-0 justify-content-center">
+        {% if page.has_previous %}
+        <li class="page-item"><a class="page-link" aria-label="Previous" href="?page={{ page.previous_page_number }}"><span aria-hidden="true">«</span></a></li>
+        {% endif %}
+        <li class="page-item"><a class="page-link" href="#">{{ page.number }}</a></li>
+        {% if page.has_next %}
+        <li class="page-item"><a class="page-link" aria-label="Next" href="?page={{ page.next_page_number }}"><span aria-hidden="true">»</span></a></li>
+        {% endif %}
+    </ul>
+</nav>
