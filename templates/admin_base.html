@@ -33,17 +33,12 @@
                 <h2 style="color: rgb(255,255,255);font-family: 'Bebas Neue', serif; margin-bottom: 0px!important;">Amenity Booker | Admin panel</h2>
                 <ul class="navbar-nav ms-auto">
                     {% if request.user.is_authenticated %}
-                    <li class="nav-item"><a class="nav-link link-light" href="#" style="font-family: 'Bebas Neue', serif;font-size: 20px;">Tenants</a></li>
-                        {% if section == "dashboard" %}
-                        <li class="nav-item"><a class="nav-link link-light" href="{% url 'dashboard' %}" style="font-family: 'Bebas Neue', serif;font-size: 20px;color: #51abac!important;">Dashboard</a></li>
-                        {% else %}
-                        <li class="nav-item"><a class="nav-link link-light" href="{% url 'dashboard' %}" style="font-family: 'Bebas Neue', serif;font-size: 20px;">Dashboard</a></li>
-                        {% endif %}
-                        {% if section == "reservation" %}
-                        <li class="nav-item"><a class="nav-link link-light" href="{% url 'reservation' %}" style="font-family: 'Bebas Neue', serif;font-size: 20px;color: #51abac!important;">Reservation</a></li>
-                        {% else %}
-                        <li class="nav-item"><a class="nav-link link-light" href="{% url 'reservation' %}" style="font-family: 'Bebas Neue', serif;font-size: 20px;">Reservation</a></li>
-                        {% endif %}
+                    <li class="nav-item"><a class="nav-link link-light" href="{% url 'admin_tenants' %}" style="font-family: 'Bebas Neue', serif;font-size: 20px;">Tenants</a></li>
+                    {% if section == "profile" %}
+                    <li class="nav-item"><a class="nav-link link-light" href="{% url 'admin_dashboard' %}" style="font-family: 'Bebas Neue', serif;font-size: 20px;color: #51abac!important;">Dashboard</a></li>
+                    {% else %}
+                    <li class="nav-item"><a class="nav-link link-light" href="{% url 'admin_dashboard' %}" style="font-family: 'Bebas Neue', serif;font-size: 20px;">Dashboard</a></li>
+                    {% endif %}
                     <li class="nav-item"><a class="nav-link link-light" href="{% url 'admin_dashboard' %}" style="font-family: 'Bebas Neue', serif;font-size: 20px;">Hello, {{ user.first_name }}</a></li>
                     <li class="nav-item"><a class="nav-link text-center" href="{% url 'logout' %}" style="font-family: 'Bebas Neue', serif;font-size: 20px;color: rgb(255,255,255);background: var(--bs-red);border-color: rgb(194,22,85);width: 99px;margin: 0px;padding: 7px;">LOGOUT</a></li>
                     {% else %}

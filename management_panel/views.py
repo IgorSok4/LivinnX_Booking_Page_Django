@@ -4,7 +4,7 @@ from django.contrib.auth.decorators import user_passes_test
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.models import User
 from django.contrib import messages
-from django.http import HttpResponseRedirect
+from django.views.generic import ListView
 from django.urls import reverse
 
 from account.models import Profile
@@ -50,18 +50,25 @@ def admin_dashboard(request):
     
 @user_passes_test(lambda u: u.is_staff)
 def admin_tenants(request):
-    all_users = Profile.objects.all().order_by('-id')
-    paginator = Paginator(all_users, 2)
+    all_users = Profile.objects.all().order_by('id')
+    paginator = Paginator(all_users, 3)
     page = request.GET.get('page')
-    
-    print(f"page: {page}")
     try:
-        posts = paginator.page(page)
+        users = paginator.page(page)
     except PageNotAnInteger:
-        posts = paginator.page(1)
+        users = paginator.page(1)
     except EmptyPage:
-        posts = paginator.page(paginator.num_pages)
+        users = paginator.page(paginator.num_pages)
+    print(f"paginator.num_pages{paginator.num_pages}")
     return render(request,
                   'management/admin_tenants.html',
-                  {'users' : all_users,
-                   'page': posts})
+                  {'users' : users,
+                   'page': page,
+                   'total_pages': paginator.num_pages})
+
+
+class TenantsListView(ListView):
+    queryset = Profile.objects.all()
+    context_object_name = 'users'
+    paginate_by = 3
+    template_name = 'management/admin_tenants.html'
