@@ -4,11 +4,13 @@ from django.contrib.auth.decorators import user_passes_test
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.models import User
 from django.contrib import messages
-from django.http import HttpResponseRedirect
+from django.utils.decorators import method_decorator
+from django.views.generic import ListView
 from django.urls import reverse
+from django.http import JsonResponse
 
 from account.models import Profile
-from .forms import AdminLoginForm
+from .forms import AdminLoginForm, PageNumberForm
 
 
 def admin_login(request):
@@ -50,18 +52,51 @@ def admin_dashboard(request):
     
 @user_passes_test(lambda u: u.is_staff)
 def admin_tenants(request):
-    all_users = Profile.objects.all().order_by('-id')
-    paginator = Paginator(all_users, 2)
+    all_users = Profile.objects.all().order_by('id')
+    paginator = Paginator(all_users, 25)
+
+    if request.method == 'POST':
+        form = PageNumberForm(request.POST)
+        if form.is_valid():
+            page = form.cleaned_data['page']
+            return redirect('admin_tenants', page=page)
+    else:
+        form = PageNumberForm()
+
     page = request.GET.get('page')
-    
-    print(f"page: {page}")
+
     try:
-        posts = paginator.page(page)
+        users = paginator.page(page)
     except PageNotAnInteger:
-        posts = paginator.page(1)
+        users = paginator.page(1)
     except EmptyPage:
-        posts = paginator.page(paginator.num_pages)
+        users = paginator.page(paginator.num_pages)
+
     return render(request,
                   'management/admin_tenants.html',
-                  {'users' : all_users,
-                   'page': posts})
+                  {'users': users,
+                   'page': page,
+                   'page_num': paginator.num_pages,
+                   'form': form})
+
+@method_decorator(user_passes_test(lambda u: u.is_staff), name='dispatch')
+class TenantsListView(ListView):
+    queryset = Profile.objects.all()
+    context_object_name = 'users'
+    paginate_by = 25
+    template_name = 'management/admin_tenants.html'
+
+
+def toggle_user_active(request, user_id):
+    if request.method == 'POST' and request.is_ajax():
+        try:
+            user = Profile.objects.get(id=user_id)
+            user.active = not user.active
+            user.save()
+            return JsonResponse({'success': True})
+        except Profile.DoesNotExist:
+            return JsonResponse({'success': False, 'error': 'User not found'})
+
+    return JsonResponse({'success': False, 'error': 'Invalid request'})
+
+
