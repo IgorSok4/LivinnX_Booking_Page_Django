@@ -1,5 +1,6 @@
 {% load static %}
 <nav>
+<<<<<<< HEAD
     <div class="d-flex justify-content-between align-items-center">
         <ul class="pagination pagination-sm mb-0">
             {% if page.has_previous %}
@@ -43,3 +44,18 @@
         </div>
     </div>
 </nav>
+=======
+    <ul class="pagination pagination-sm mb-0 justify-content-center">
+        {% if page.has_previous %}
+        <li class="page-item"><a class="page-link" aria-label="Previous" href="?page={{ page.previous_page_number }}"><span aria-hidden="true">«</span></a></li>
+        {% endif %}
+        {% for page_num in total_pages %}
+            <li class="page-item"><a class="page-link" href="#">{{ page_num }}</a></li>
+        {% endfor %}
+        <li class="page-item"><a class="page-link" href="#">{{ page.number }}</a></li>
+        {% if page.has_next %}
+        <li class="page-item"><a class="page-link" aria-label="Next" href="?page={{ page.next_page_number }}"><span aria-hidden="true">»</span></a></li>
+        {% endif %}
+    </ul>
+</nav>
+>>>>>>> b8b7a38f9007bd786575cef10ef0da2b796630b1

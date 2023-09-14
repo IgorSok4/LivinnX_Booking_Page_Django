@@ -4,7 +4,10 @@ from django.contrib.auth.decorators import user_passes_test
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.models import User
 from django.contrib import messages
+<<<<<<< HEAD
 from django.utils.decorators import method_decorator
+=======
+>>>>>>> b8b7a38f9007bd786575cef10ef0da2b796630b1
 from django.views.generic import ListView
 from django.urls import reverse
 from django.http import JsonResponse
@@ -53,6 +56,7 @@ def admin_dashboard(request):
 @user_passes_test(lambda u: u.is_staff)
 def admin_tenants(request):
     all_users = Profile.objects.all().order_by('id')
+<<<<<<< HEAD
     paginator = Paginator(all_users, 25)
 
     if request.method == 'POST':
@@ -65,12 +69,17 @@ def admin_tenants(request):
 
     page = request.GET.get('page')
 
+=======
+    paginator = Paginator(all_users, 3)
+    page = request.GET.get('page')
+>>>>>>> b8b7a38f9007bd786575cef10ef0da2b796630b1
     try:
         users = paginator.page(page)
     except PageNotAnInteger:
         users = paginator.page(1)
     except EmptyPage:
         users = paginator.page(paginator.num_pages)
+<<<<<<< HEAD
 
     return render(request,
                   'management/admin_tenants.html',
@@ -100,3 +109,18 @@ def toggle_user_active(request, user_id):
     return JsonResponse({'success': False, 'error': 'Invalid request'})
 
 
+=======
+    print(f"paginator.num_pages{paginator.num_pages}")
+    return render(request,
+                  'management/admin_tenants.html',
+                  {'users' : users,
+                   'page': page,
+                   'total_pages': paginator.num_pages})
+
+
+class TenantsListView(ListView):
+    queryset = Profile.objects.all()
+    context_object_name = 'users'
+    paginate_by = 3
+    template_name = 'management/admin_tenants.html'
+>>>>>>> b8b7a38f9007bd786575cef10ef0da2b796630b1
