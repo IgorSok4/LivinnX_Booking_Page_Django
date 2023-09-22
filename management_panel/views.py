@@ -1,5 +1,7 @@
+from datetime import datetime, timedelta
+
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.models import User
@@ -7,10 +9,11 @@ from django.contrib import messages
 from django.utils.decorators import method_decorator
 from django.views.generic import ListView
 from django.urls import reverse
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse, HttpResponseNotAllowed
 
 from account.models import Profile
-from .forms import AdminLoginForm, PageNumberForm
+from .forms import AdminLoginForm, PageNumberForm, TenantEditForm
+from AmenityBooker.models import UserReservation, ReservationModel, Amenity
 
 
 def admin_login(request):
@@ -88,7 +91,7 @@ class TenantsListView(ListView):
 
 
 def toggle_user_active(request, user_id):
-    if request.method == 'POST' and request.is_ajax():
+    if request.method == 'POST' and request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         try:
             user = Profile.objects.get(id=user_id)
             user.active = not user.active
@@ -99,4 +102,76 @@ def toggle_user_active(request, user_id):
 
     return JsonResponse({'success': False, 'error': 'Invalid request'})
 
+
+@user_passes_test(lambda u: u.is_staff)
+def admin_tenant_profile(request, user_id, name, surname):
+    todays_date = datetime.now().date()
+    tomorrows_date = todays_date + timedelta(days=1)
+    user = Profile.objects.get(id=user_id)
+    user_reservations = UserReservation.objects.filter(user=user.user)
+    amenities = Amenity.objects.all()
+
+    if request.method == 'POST':
+        form = TenantEditForm(request.POST)
+        if form.is_valid():
+            user.user.first_name = form.cleaned_data['first_name']
+            user.user.last_name = form.cleaned_data['last_name']
+            user.user.email = form.cleaned_data['email']
+            user.user.save()
+    else:
+        initial_data = {
+            'first_name': user.user.first_name,
+            'last_name': user.user.last_name,
+            'email': user.user.email,
+        }
+        form = TenantEditForm(initial=initial_data)
+
+    return render(request, 'management/admin_tenant_profile.html', 
+                  {'form': form, 
+                   'user': user,
+                   'user_reservations': user_reservations,
+                   'todays_date': todays_date,
+                   'tomorrows_date': tomorrows_date,
+                   'amenities':amenities,})
+
+
+@user_passes_test(lambda u: u.is_staff)
+def reservation_delete(request, reservation_id):
+    reservation = get_object_or_404(UserReservation, id=reservation_id)
+    user = reservation.user
+    if user == reservation.user:
+        if request.method == "POST":
+            today_date = datetime.today().date()
+            hours_to_return = reservation.hours_booked.all()
+            reservation_model = ReservationModel.objects.get(date=today_date, amenity=reservation.amenity)
+            
+            if reservation.date == today_date:
+                for hour in hours_to_return:
+                    reservation_model.hours_available_today.add(hour)
+                    reservation_model.hours_booked_today.remove(hour)
+                    
+            elif reservation.date == today_date + timedelta(days=1):
+                for hour in hours_to_return:
+                    reservation_model.hours_available_tomorrow.add(hour)
+                    reservation_model.hours_booked_tomorrow.remove(hour)
+
+            reservation.delete()
+            return redirect('admin_dashboard')
+        else:
+            return HttpResponseNotAllowed(['POST'])
+    else:
+        return HttpResponse("You don't have permission to delete this reservation.")
+    
+
+def toggle_reservation_active(request, reservation_id):
+    if request.method == 'POST' and request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        try:
+            reservation = UserReservation.objects.get(id=reservation_id)
+            reservation.active = not reservation.active
+            reservation.save()
+            return JsonResponse({'success': True})
+        except UserReservation.DoesNotExist:
+            return JsonResponse({'success': False, 'error': 'Reservation not found'})
+
+    return JsonResponse({'success': False, 'error': 'Invalid request'})
 

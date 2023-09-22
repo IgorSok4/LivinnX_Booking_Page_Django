@@ -55,10 +55,13 @@
                                         {% endif %}
                                     </button>
                                 </td>
-                                <td class="text-center"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16" class="bi bi-eye-fill fs-5 text-primary">
-                                        <path d="M10.5 8a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0z"></path>
-                                        <path d="M0 8s3-5.5 8-5.5S16 8 16 8s-3 5.5-8 5.5S0 8 0 8zm8 3.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z"></path>
-                                    </svg>
+                                <td class="text-center">
+                                    <a href="{% url 'admin_tenant_profile' user_id=user.id name=user.user.first_name surname=user.user.last_name %}">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16" class="bi bi-eye-fill fs-5 text-primary">
+                                            <path d="M10.5 8a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0z"></path>
+                                            <path d="M0 8s3-5.5 8-5.5S16 8 16 8s-3 5.5-8 5.5S0 8 0 8zm8 3.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z"></path>
+                                        </svg>
+                                    </a>
                                 </td>
                             </tr>
                             {% endfor %}
@@ -97,7 +100,6 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        // Zaktualizuj widok użytkownika
                         if (action === 'activate') {
                             this.textContent = 'Deactivate';
                         } else {
