@@ -102,6 +102,7 @@ def toggle_user_active(request, user_id):
 
     return JsonResponse({'success': False, 'error': 'Invalid request'})
 
+from django.shortcuts import redirect  # Importuj redirect
 
 @user_passes_test(lambda u: u.is_staff)
 def admin_tenant_profile(request, user_id, name, surname):
@@ -111,28 +112,40 @@ def admin_tenant_profile(request, user_id, name, surname):
     user_reservations = UserReservation.objects.filter(user=user.user)
     amenities = Amenity.objects.all()
 
-    if request.method == 'POST':
-        form = TenantEditForm(request.POST)
-        if form.is_valid():
-            user.user.first_name = form.cleaned_data['first_name']
-            user.user.last_name = form.cleaned_data['last_name']
-            user.user.email = form.cleaned_data['email']
-            user.user.save()
-    else:
-        initial_data = {
-            'first_name': user.user.first_name,
-            'last_name': user.user.last_name,
-            'email': user.user.email,
-        }
-        form = TenantEditForm(initial=initial_data)
+    tenant_edit_form = TenantEditForm(instance=user.user)
+    
+    amenities_active = {
+        'amenities_details': [
+            {'name': 'Sauna', 'active': user.sauna_active},
+            {'name': 'Jacuzzi', 'active': user.jacuzzi_active},
+            {'name': 'Orange', 'active': user.orange_active},
+            {'name': 'Blue', 'active': user.blue_active},
+            {'name': 'Music', 'active': user.music_active},
+            {'name': 'Art', 'active': user.art_active},
+        ]
+    }
 
-    return render(request, 'management/admin_tenant_profile.html', 
-                  {'form': form, 
-                   'user': user,
-                   'user_reservations': user_reservations,
-                   'todays_date': todays_date,
-                   'tomorrows_date': tomorrows_date,
-                   'amenities':amenities,})
+    if request.method == 'POST':
+        if 'user_profile' in request.POST:
+            print("user_profile in request.POST")
+            tenant_edit_form = TenantEditForm(request.POST, instance=user.user)
+
+            if tenant_edit_form.is_valid():
+                tenant_edit_form.save()
+                return redirect('admin_tenant_profile', user_id=user_id, name=name, surname=surname)
+
+    user = Profile.objects.get(id=user_id)
+
+    return render(request, 'management/admin_tenant_profile.html', {
+        'tenant_edit_form': tenant_edit_form,
+        'user': user,
+        'user_reservations': user_reservations,
+        'todays_date': todays_date,
+        'tomorrows_date': tomorrows_date,
+        'amenities': amenities,
+        'amenities_active': amenities_active,
+    })
+
 
 
 @user_passes_test(lambda u: u.is_staff)

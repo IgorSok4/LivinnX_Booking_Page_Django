@@ -21,13 +21,14 @@
     height: 500px;
     padding: 20px;
     width: 320px;
-    display: grid;
+    display: block;
+    margin: auto;
     }
 
     .title {
     color: #eee;
     font-family: sans-serif;
-    font-size: 36px;
+    font-size: 30px;
     font-weight: 600;
     margin-top: 30px;
     }
@@ -35,7 +36,7 @@
     .subtitle {
     color: #eee;
     font-family: sans-serif;
-    font-size: 16px;
+    font-size: 22px;
     font-weight: 600;
     margin-top: 10px;
     }
@@ -70,27 +71,27 @@
 <section style="background: linear-gradient(#ffffff 0%, rgb(184,237,233) 52%, #54fff5 100%);margin-top: 150px;">
     <div class="container">
         <div class="row">
-            <div class="col-md-4"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16" class="bi bi-person-fill" style="font-size: 116px;height: 138px;width: 119px;margin-left: 68px;margin-top: 0px;">
+            <div class="col-md-4"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16" class="bi bi-person-fill" style="font-size: 116px;height: 138px;width: 119px;display: block;margin: auto;">
                     <path d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1H3zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"></path>
                 </svg>
-                {% comment %} <h3 style="font-family: 'Bebas Neue', serif;">{{ user.user.first_name }} {{ user.user.last_name }} Profile</h3> {% endcomment %}
-                <form method="post">
+                <form method="post" name="user_profile">
                     {% csrf_token %}
+                    <input type="hidden" name="user_profile" value="1">
                     <div class="form">
                         <div class="title">Tenant Profile</div>
-                        <h3 style="font-family: 'Bebas Neue', serif;">{{ user.user.first_name }} {{ user.user.last_name }}</h3>
+                        <h2 style="font-family: 'Bebas Neue', serif;">{{ user.user.first_name }} {{ user.user.last_name }}</h2>
                         <div class="input-container ic1">
-                            <input id="firstname" class="input" type="text" placeholder=" " name="{{ form.first_name.name }}" value="{{ form.first_name.value }}">
+                            <input id="firstname" class="input" type="text" placeholder=" " name="{{ tenant_edit_form.first_name.name }}" value="{{ tenant_edit_form.first_name.value }}">
                         </div>
                         <div class="input-container ic2">
-                            <input id="lastname" class="input" type="text" placeholder=" " name="{{ form.last_name.name }}" value="{{ form.last_name.value }}">
+                            <input id="lastname" class="input" type="text" placeholder=" " name="{{ tenant_edit_form.last_name.name }}" value="{{ tenant_edit_form.last_name.value }}">
                         </div>
                         <div class="input-container ic2">
-                            <input id="email" class="input" type="text" placeholder="Email" name="{{ form.email.name }}" value="{{ form.email.value }}">
+                            <input id="email" class="input" type="text" placeholder="Email" name="{{ tenant_edit_form.email.name }}" value="{{ tenant_edit_form.email.value }}">
                         </div>
                         <button class="btn btn-outline-primary btn-sm" style="margin-top:20px;" type="submit">Save</button>
                     </div>
-                </form>            
+                </form>
             </div>
             <div class="col-md-4">
                 <h3 style="font-family: 'Bebas Neue', serif;">Tenant current reservations</h3>
@@ -130,7 +131,7 @@
                 </div>
             </div>
             <div class="col-md-4">
-                <h3 style="font-family: 'Bebas Neue', serif;">Tenant Past Reservations:</h3>
+                <h3 style="font-family: 'Bebas Neue', serif;">Past reservations:</h3>
                 <div class="row">
                     <div class="col-md-6 offset-md-3">
                         <div id="faqlist" class="accordion accordion-flush">
@@ -159,27 +160,73 @@
                     </div>
                 </div>
             </div>
-            <div>
+            <div class="col-md-4" style="margin-top: 50px;">
                 <h3 style="font-family: 'Bebas Neue', serif;">Available Amenities For The Tenant</h3>
-                <div class="row gy-4 row-cols-1 row-cols-md-2 row-cols-xl-3">
-                    {% for amenity in amenities %}
-                    <div class="col">
-                        <div class="d-flex">
-                            <div>
-                                {% for image in amenity.images.all %}
-                                <a href="#"><img class="flex-shrink-0 me-3 fit-cover" width="60" height="60" src="{{ image.file.url }}" alt="{{ image.file.name }}"></a>
-                                {% endfor %}    
-                                    <path d="M8 16a2 2 0 0 0 2-2H6a2 2 0 0 0 2 2zM8 1.918l-.797.161A4.002 4.002 0 0 0 4 6c0 .628-.134 2.197-.459 3.742-.16.767-.376 1.566-.663 2.258h10.244c-.287-.692-.502-1.49-.663-2.258C12.134 8.197 12 6.628 12 6a4.002 4.002 0 0 0-3.203-3.92L8 1.917zM14.22 12c.223.447.481.801.78 1H1c.299-.199.557-.553.78-1C2.68 10.2 3 6.88 3 6c0-2.42 1.72-4.44 4.005-4.901a1 1 0 1 1 1.99 0A5.002 5.002 0 0 1 13 6c0 .88.32 4.2 1.22 6z"></path>
+                <div class="row">
+                    <div class="col-md-6 offset-md-3">
+                        <div id="faqlist" class="accordion accordion-flush">
+                            {% for amenity_detail in amenities_active.amenities_details %}
+                            <div class="accordion-item">
+                                <h2 class="accordion-header">
+                                    <button class="btn accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#content-accordion-{{ amenity_detail.name }}" style="font-family: 'Bebas Neue'">
+                                        {{ amenity_detail.name }} |
+                                        {% if amenity_detail.active %}
+                                            Active 
+                                        {% else %}
+                                            Inactive
+                                        {% endif %}
+                                    </button>
+                                </h2>
+                                <div id="content-accordion-{{ amenity_detail.name }}" class="accordion-collapse collapse" data-bs-parent="#faqlist">
+                                    <p class="accordion-body">
+                                        {% if amenity_detail.active %}
+                                            This amenity is currently active for this Tenant.
+                                        {% else %}
+                                            This amenity is currently inactive for this Tenant.
+                                        {% endif %}                                        
+                                    </p>
+                                    <button class="btn btn-danger toggle-active" data-reservation-id="{{ reservation.id }}" data-url="#">
+                                        {% if user.active %}
+                                            Deactivate
+                                        {% else %}
+                                            Activate
+                                        {% endif %}
+                                    </button>
+                                </div>
                             </div>
-                            <div class="px-3 amenity-text">
-                                <a href="#">
-                                <h4 class="text-black">{{ amenity.name }}</h4>
-                                <p style="color: black;">{{ amenity.description }}</p>
-                                </a>
-                            </div>
+                            {% endfor %}           
                         </div>
                     </div>
-                    {% endfor %}
+                </div>
+            </div>
+            <div class="col-md-4" style="margin-top: 50px;">
+                <h3 style="font-family: 'Bebas Neue', serif;">Account comments</h3>
+                <div class="row">
+                    <div class="col-md-6 offset-md-3">
+                        <div id="faqlist" class="accordion accordion-flush">
+                            {% for reservation in user_reservations|slice:":10" %}
+                            {% if reservation.date != todays_date and reservation.date != tomorrows_date %}
+                            <div class="accordion-item">
+                                <h2 class="accordion-header"><button class="btn accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#content-accordion-past-{{ forloop.counter }}" style="font-family: 'Bebas Neue'">{{ reservation.amenity }} | #{{ reservation.id }} | 
+                                {% if reservation.active %}
+                                    Active
+                                {% else %}
+                                    Inactive
+                                {% endif %}
+                                </button></h2>
+                                <div id="content-accordion-past-{{ forloop.counter }}" class="accordion-collapse collapse" data-bs-parent="#faqlist">
+                                    <p class="accordion-body">{{ reservation.date }}</p>
+                                    <p class="accordion-body">
+                                    {% for hour in reservation.hours_booked.all %}
+                                        {{ hour }},
+                                    {% endfor %}
+                                    </p>
+                                </div>
+                            </div>
+                            {% endif %}
+                            {% endfor %}
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

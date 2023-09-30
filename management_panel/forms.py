@@ -1,4 +1,6 @@
 from django import forms
+from django.contrib.auth.models import User
+from account.models import Profile
 
 
 class AdminLoginForm(forms.Form):
@@ -8,7 +10,8 @@ class AdminLoginForm(forms.Form):
 class PageNumberForm(forms.Form):
     page = forms.IntegerField(label='Page Number', min_value=1)
 
-class TenantEditForm(forms.Form):
-    first_name = forms.CharField(label='First Name', max_length=100)
-    last_name = forms.CharField(label='Last Name', max_length=100)
-    email = forms.EmailField(label='Email')
+class TenantEditForm(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = ['first_name', 'last_name', 'email']
+
