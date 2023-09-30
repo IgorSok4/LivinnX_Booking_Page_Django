@@ -11,8 +11,8 @@ from django.views.generic import ListView
 from django.urls import reverse
 from django.http import JsonResponse, HttpResponse, HttpResponseNotAllowed
 
-from account.models import Profile
-from .forms import AdminLoginForm, PageNumberForm, TenantEditForm
+from account.models import Profile, Comment
+from .forms import AdminLoginForm, PageNumberForm, TenantEditForm, CommentForm
 from AmenityBooker.models import UserReservation, ReservationModel, Amenity
 
 
@@ -111,8 +111,7 @@ def admin_tenant_profile(request, user_id, name, surname):
     user = Profile.objects.get(id=user_id)
     user_reservations = UserReservation.objects.filter(user=user.user)
     amenities = Amenity.objects.all()
-
-    tenant_edit_form = TenantEditForm(instance=user.user)
+    comments = Comment.objects.filter(user=user.user)
     
     amenities_active = {
         'amenities_details': [
@@ -124,20 +123,33 @@ def admin_tenant_profile(request, user_id, name, surname):
             {'name': 'Art', 'active': user.art_active},
         ]
     }
+    
+    tenant_edit_form = TenantEditForm(instance=user.user)
+    comment_form = CommentForm()
 
     if request.method == 'POST':
         if 'user_profile' in request.POST:
-            print("user_profile in request.POST")
             tenant_edit_form = TenantEditForm(request.POST, instance=user.user)
 
             if tenant_edit_form.is_valid():
                 tenant_edit_form.save()
                 return redirect('admin_tenant_profile', user_id=user_id, name=name, surname=surname)
+        
+        if 'user_comments' in request.POST:
+            comment_form = CommentForm(data=request.POST)
+            if comment_form.is_valid():
+                new_comment = comment_form.save(commit=False)
+                new_comment.user = user.user
+                new_comment.save()
+            else:
+                comment_form = CommentForm()
 
     user = Profile.objects.get(id=user_id)
 
     return render(request, 'management/admin_tenant_profile.html', {
         'tenant_edit_form': tenant_edit_form,
+        'comments': comments,
+        'comment_form': comment_form,
         'user': user,
         'user_reservations': user_reservations,
         'todays_date': todays_date,
@@ -187,4 +199,13 @@ def toggle_reservation_active(request, reservation_id):
             return JsonResponse({'success': False, 'error': 'Reservation not found'})
 
     return JsonResponse({'success': False, 'error': 'Invalid request'})
+
+
+def delete_comment(request, user_id, comment_id):
+    comment = get_object_or_404(Comment, id=comment_id)
+    
+    if request.user == request.user.is_staff or request.user.is_superuser:
+        comment.delete()
+        
+    return redirect('admin_tenant_profile', user_id=user_id, name=comment.user.first_name, surname=comment.user.last_name)
 

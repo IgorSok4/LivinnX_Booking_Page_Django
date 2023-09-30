@@ -203,31 +203,49 @@
                 <h3 style="font-family: 'Bebas Neue', serif;">Account comments</h3>
                 <div class="row">
                     <div class="col-md-6 offset-md-3">
+                        {% with comments.count as total_comments %}
+                        <h6>
+                            {{ total_comments }} comment{{ total_comments|pluralize:"s" }}
+                        </h6>
+                    {% endwith %}
                         <div id="faqlist" class="accordion accordion-flush">
-                            {% for reservation in user_reservations|slice:":10" %}
-                            {% if reservation.date != todays_date and reservation.date != tomorrows_date %}
+                            {% for comment in comments %}
                             <div class="accordion-item">
-                                <h2 class="accordion-header"><button class="btn accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#content-accordion-past-{{ forloop.counter }}" style="font-family: 'Bebas Neue'">{{ reservation.amenity }} | #{{ reservation.id }} | 
-                                {% if reservation.active %}
-                                    Active
-                                {% else %}
-                                    Inactive
-                                {% endif %}
-                                </button></h2>
-                                <div id="content-accordion-past-{{ forloop.counter }}" class="accordion-collapse collapse" data-bs-parent="#faqlist">
-                                    <p class="accordion-body">{{ reservation.date }}</p>
+                                <h2 class="accordion-header">
+                                    <button class="btn accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#comment-accordion-{{ comment.id }}" style="font-family: 'Bebas Neue'">
+                                        {{ comment.created|date:"SHORT_DATE_FORMAT" }} | 
+                                        {{ comment.text|slice:":10" }}
+                                    </button>
+                                </h2>
+                                <div id="comment-accordion-{{ comment.id }}" class="accordion-collapse collapse" data-bs-parent="#faqlist">
                                     <p class="accordion-body">
-                                    {% for hour in reservation.hours_booked.all %}
-                                        {{ hour }},
-                                    {% endfor %}
+                                        {{ comment.text|linebreaks }}
                                     </p>
+                                    <form method="post" action="{% url 'delete_comment' user_id=user.id comment_id=comment.id %}">
+                                        {% csrf_token %}
+                                        <button class="btn btn-danger toggle-active" type="submit">Delete Comment</button>
+                                    </form>
                                 </div>
                             </div>
-                            {% endif %}
+                            {% empty %}
+                                <p>There are no comments yet.</p>
                             {% endfor %}
                         </div>
                     </div>
                 </div>
+            </div>
+            <div class="col-md-4">
+                <form method="post" name="user_comments">
+                    {% csrf_token %}
+                    <input type="hidden" name="user_comments" value="1">
+                    <div class="form">
+                        <h3 style="font-family: 'Bebas Neue', serif;">Add New Comment</h3>
+                        <div class="input-container ic1">
+                            <textarea id="{{ comment_form.text.id }}" class="input" name="{{ comment_form.text.name }}" rows="4" placeholder="Your Comment"></textarea>
+                        </div>
+                        <button class="btn btn-outline-primary btn-sm" style="margin-top:10px;" type="submit">Save comment</button>
+                    </div>
+                </form>            
             </div>
         </div>
     </div>

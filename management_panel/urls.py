@@ -9,4 +9,5 @@ urlpatterns = [
     path('profile/<str:name>-<str:surname>/<int:user_id>', views.admin_tenant_profile, name='admin_tenant_profile'),
     path('reservation_delete/<int:reservation_id>/', views.reservation_delete, name='admin_reservation_delete'),
     path('admin/tenants/toggle_reservation_active/<int:reservation_id>/', views.toggle_reservation_active, name='toggle_reservation_active'),
+    path('delete_comment/<int:user_id>/<int:comment_id>/', views.delete_comment, name='delete_comment'),
 ]

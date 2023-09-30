@@ -7,6 +7,6 @@ class ProfileAdmin(admin.ModelAdmin):
     
 @admin.register(Comment)
 class CommentAdmin(admin.ModelAdmin):
-    list_display= ('tenant', 'created', 'text')
-    list_filter = ('tenant',)
-    search_fields = ('tenant', 'text')
+    list_display= ('user', 'created', 'text')
+    list_filter = ('user',)
+    search_fields = ('user', 'text')
