@@ -12,6 +12,7 @@ from django.urls import reverse
 from django.http import JsonResponse, HttpResponse, HttpResponseNotAllowed
 
 from account.models import Profile, Comment
+from AmenityBooker.models import Amenity
 from .forms import AdminLoginForm, PageNumberForm, TenantEditForm, CommentForm
 from AmenityBooker.models import UserReservation, ReservationModel, Amenity
 
@@ -49,8 +50,25 @@ def admin_login(request):
     
 @user_passes_test(lambda u: u.is_staff)
 def admin_dashboard(request):
+    amenities = Amenity.objects.all()
+    print(amenities)
+    
     return render(request,
-                  'management/admin_dashboard.html')
+                  'management/admin_dashboard.html',
+                  {'amenities': amenities,
+                   })
+    
+@user_passes_test(lambda u: u.is_staff)
+def admin_amenity_active(request, amenity_id):
+    amenity = get_object_or_404(Amenity, id=amenity_id)
+    print(amenity_id)
+    
+    if request.method == "POST":
+        amenity.available = not amenity.available
+        amenity.save()
+        return redirect('admin_dashboard')
+    else:
+        return HttpResponseNotAllowed(['POST'])
     
     
 @user_passes_test(lambda u: u.is_staff)
@@ -101,8 +119,6 @@ def toggle_user_active(request, user_id):
             return JsonResponse({'success': False, 'error': 'User not found'})
 
     return JsonResponse({'success': False, 'error': 'Invalid request'})
-
-from django.shortcuts import redirect  # Importuj redirect
 
 @user_passes_test(lambda u: u.is_staff)
 def admin_tenant_profile(request, user_id, name, surname):

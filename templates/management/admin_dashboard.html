@@ -26,61 +26,44 @@
                 <h5><a href="{% url "password_change" %}">Change your password</a>.</h5>
             </div>
             <div class="col-md-4">
-                <h3 style="font-family: 'Bebas Neue', serif;">Your reservations:</h3>
+                <h3 style="font-family: 'Bebas Neue', serif;">Available Amenities</h3>
+                <h5 style="font-family: 'Bebas Neue', serif;">Change the availability of a particular amenity</h5>
                 <div class="row">
                     <div class="col-md-6 offset-md-3">
                         <div id="faqlist" class="accordion accordion-flush">
-                            {% for reservation in user_reservations %}
-                            {% if reservation.date == todays_date or reservation.date == tomorrows_date %}
+                            {% for amenity in amenities %}
                             <div class="accordion-item">
-                                <h2 class="accordion-header"><button class="btn accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#content-accordion-{{ forloop.counter }}" style="font-family: 'Bebas Neue'">{{ reservation.amenity }} | #{{ reservation.id }} |
-                                {% if reservation.active %}
-                                    <span class="active">Active</span>
-                                {% else %}
-                                    <span class="inactive">Inactive</span>
-                                {% endif %}</button></h2>
-                                <div id="content-accordion-{{ forloop.counter }}" class="accordion-collapse collapse" data-bs-parent="#faqlist">
-                                    <p class="accordion-body">{{ reservation.date }}</p>
+                                <h2 class="accordion-header">
+                                    <button class="btn accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#content-accordion-{{ amenity.slug }}" style="font-family: 'Bebas Neue'">
+                                        {{ amenity.slug }} |
+                                        {% if amenity.available %}
+                                            Active 
+                                        {% else %}
+                                            Inactive
+                                        {% endif %}
+                                    </button>
+                                </h2>
+                                <div id="content-accordion-{{ amenity.slug }}" class="accordion-collapse collapse" data-bs-parent="#faqlist">
                                     <p class="accordion-body">
-                                        {% for hour in reservation.hours_booked.all %}
-                                            {{ hour }},
-                                        {% endfor %}
+                                        {% if amenity.available %}
+                                            This amenity is currently active.
+                                        {% else %}
+                                            This amenity is currently inactive.
+                                        {% endif %}                                        
                                     </p>
-                                    <a href="{% url 'reservation_delete' reservation.id %}" class="btn btn-danger delete-btn">Delete</a>
-                                    {% comment %} {% url 'reservation_delete' reservation.id %} {% endcomment %}
+                                    {% if amenity.available %}
+                                    <form method="POST" action="{% url 'admin_amenity_active' amenity_id=amenity.id %}">
+                                        {% csrf_token %}
+                                        <button class="btn btn-danger deactivate-btn" data-url="{% url 'admin_amenity_active' amenity_id=amenity.id %}" type="submit">Deactivate</button>
+                                    </form>
+                                    {% else %}
+                                    <form method="POST" action="{% url 'admin_amenity_active' amenity_id=amenity.id %}">
+                                        {% csrf_token %}
+                                        <button class="btn btn-danger" data-url="{% url 'admin_amenity_active' amenity_id=amenity.id %}" type="submit">Activate</button>
+                                    </form>
+                                    {% endif %}
                                 </div>
                             </div>
-                            {% endif %}
-                            {% endfor %}
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <h3 style="font-family: 'Bebas Neue', serif;">Past reservations:</h3>
-                <div class="row">
-                    <div class="col-md-6 offset-md-3">
-                        <div id="faqlist" class="accordion accordion-flush">
-                            {% for reservation in user_reservations|slice:":10" %}
-                            {% if reservation.date != todays_date and reservation.date != tomorrows_date %}
-                            <div class="accordion-item">
-                                <h2 class="accordion-header"><button class="btn accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#content-accordion-past-{{ forloop.counter }}" style="font-family: 'Bebas Neue'">{{ reservation.amenity }} | #{{ reservation.id }} | 
-                                {% if reservation.active %}
-                                    Active
-                                {% else %}
-                                    Inactive
-                                {% endif %}
-                                </button></h2>
-                                <div id="content-accordion-past-{{ forloop.counter }}" class="accordion-collapse collapse" data-bs-parent="#faqlist">
-                                    <p class="accordion-body">{{ reservation.date }}</p>
-                                    <p class="accordion-body">
-                                    {% for hour in reservation.hours_booked.all %}
-                                        {{ hour }},
-                                    {% endfor %}
-                                    </p>
-                                </div>
-                            </div>
-                            {% endif %}
                             {% endfor %}
                         </div>
                     </div>
@@ -92,30 +75,45 @@
 {% endblock content %}
 {% block extra_js %}
 <script>
-document.querySelectorAll('.delete-btn').forEach(btn => {
+document.querySelectorAll('.deactivate-btn').forEach(btn => {
     btn.addEventListener('click', function (e) {
         e.preventDefault();
-        const href = this.getAttribute('href');
+        const href = this.getAttribute('data-url');
         swal({
             title: "Are you sure?",
-            text: "Once deleted, you may not be able to recover this reservation!",
+            text: "Are you going to completely disable this amenity in the building. No reservations will be possible.",
             icon: "warning",
             buttons: true,
             dangerMode: true,
         })
-        .then((willDelete) => {
-            if (willDelete) {
-                fetch(href, {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRFToken': '{{ csrf_token }}'
-                    },
+        .then((willDeactivate) => {
+            if (willDeactivate) {
+                swal({
+                    title: "Enter Admin Password",
+                    text: "Please enter the admin password to confirm:",
+                    content: "input",
+                    icon: "info",
+                    buttons: true,
+                    dangerMode: true,
                 })
-                .then(res => window.location.reload())
-                .catch(err => console.log(err));
+                .then((adminPassword) => {
+                    if (adminPassword) {
+                        fetch(href, {
+                            method: 'POST',
+                            headers: {
+                                'X-CSRFToken': '{{ csrf_token }}',
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({ adminPassword }),
+                        })
+                        .then(res => window.location.reload())
+                        .catch(err => console.log(err));
+                    }
+                });
             }
         });
     });
 });
+
 </script>
 {% endblock extra_js %}
