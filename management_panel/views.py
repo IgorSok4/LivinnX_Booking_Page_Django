@@ -51,25 +51,34 @@ def admin_login(request):
 @user_passes_test(lambda u: u.is_staff)
 def admin_dashboard(request):
     amenities = Amenity.objects.all()
-    print(amenities)
+    latest_reservations = UserReservation.objects.all().order_by('-id')[:10]
     
     return render(request,
                   'management/admin_dashboard.html',
                   {'amenities': amenities,
+                   'latest_reservations' : latest_reservations,
                    })
+    
     
 @user_passes_test(lambda u: u.is_staff)
 def admin_amenity_active(request, amenity_id):
     amenity = get_object_or_404(Amenity, id=amenity_id)
-    print(amenity_id)
-    
+    user = request.user
+
     if request.method == "POST":
-        amenity.available = not amenity.available
-        amenity.save()
-        return redirect('admin_dashboard')
+        if user.is_superuser:
+            amenity.available = not amenity.available
+            amenity.save()
+            return redirect('admin_dashboard')
+        else:
+            response_data = {
+                "message": "You don't have permission.",
+                "success": False
+            }
+            return JsonResponse(response_data, status=403)
     else:
         return HttpResponseNotAllowed(['POST'])
-    
+
     
 @user_passes_test(lambda u: u.is_staff)
 def admin_tenants(request):
