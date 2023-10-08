@@ -6,6 +6,7 @@
 {% block content %}
 <style>
     a, h5 {
+        font-family: 'Bebas Neue', serif;
         color: #51ABAC;
     }
     .active {
@@ -30,7 +31,6 @@
     font-family: sans-serif;
     font-size: 30px;
     font-weight: 600;
-    margin-top: 30px;
     }
 
     .subtitle {
@@ -78,6 +78,13 @@
                     <div class="form">
                         <div class="title">Tenant Profile</div>
                         <h2 style="font-family: 'Bebas Neue', serif;">{{ user.user.first_name }} {{ user.user.last_name }}</h2>
+                        <h4 style="font-family: 'Bebas Neue', serif;">
+                            {% if user.active %}
+                                Active | ID: {{ user.id }}
+                            {% else %}
+                                Inactive | ID: {{ user.id }}
+                            {% endif %}
+                        </h4>
                         <div class="input-container ic1">
                             <input id="firstname" class="input" type="text" placeholder=" " name="{{ tenant_edit_form.first_name.name }}" value="{{ tenant_edit_form.first_name.value }}">
                         </div>

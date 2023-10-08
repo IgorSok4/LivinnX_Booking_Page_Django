@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.shortcuts import render, redirect, get_object_or_404
@@ -47,16 +47,52 @@ def admin_login(request):
 
     return render(request, 'management/login_admin.html', {'form': form})
 
-    
+def hour_start_time(hour_string):
+    hour_string = str(hour_string)
+    start_time_str = hour_string.split('-')[0]
+    return datetime.strptime(start_time_str, '%H:%M').time()
+
+def is_current_time_before(hour_string):
+    current_time = datetime.now().time()
+    start_time, _ = hour_start_time(hour_string)
+    return current_time < start_time
+
+
 @user_passes_test(lambda u: u.is_staff)
 def admin_dashboard(request):
     amenities = Amenity.objects.all()
     latest_reservations = UserReservation.objects.all().order_by('-id')[:10]
+    incoming_reservations = UserReservation.objects.all().order_by('-date')[:10]
     
+    current_datetime = datetime.now()
+    
+    incoming_reservations = [
+        r for r in incoming_reservations
+        if r.date >= date.today() and (
+            any(
+                current_datetime < datetime.combine(r.date, hour_start_time(hour_block))
+                for hour_block in r.hours_booked.all()[:1]
+            ) or r.date > date.today()
+        )
+    ]
+
+    incoming_reservations = sorted(
+        incoming_reservations,
+        key=lambda r: (min(
+                abs((datetime.combine(r.date, hour_start_time(hour_block)) - current_datetime).seconds)
+                for hour_block in r.hours_booked.all()[:1])))
+
+    # for reservation in incoming_reservations:
+    #     for hour_block in reservation.hours_booked.all()[:1]:
+    #         seconds = abs((datetime.combine(reservation.date, hour_start_time(hour_block)) - current_datetime).seconds)
+    #         print(f"Rezerwacja: {reservation}, Seconds: {seconds}")
+
+
     return render(request,
                   'management/admin_dashboard.html',
                   {'amenities': amenities,
                    'latest_reservations' : latest_reservations,
+                   'incoming_reservations': incoming_reservations,
                    })
     
     

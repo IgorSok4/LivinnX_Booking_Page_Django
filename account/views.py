@@ -79,10 +79,6 @@ def reservation_delete(request, reservation_id):
             reservation.delete()
             return redirect('user_profile')
 
-        
-        
-        # TO DO: Handle deleting tomorrows reservation
-
     
 @login_required
 def edit(request):
@@ -108,7 +104,7 @@ def register(request):
             new_user.set_password(
                 user_form.cleaned_data['password'])
             new_user.save()
-            new_profile = Profile.objects.create(user=new_user)
+            new_profile = Profile.objects.create(user=new_user, id=new_user.id)
             return render(request,
                           'account/register_done.html',
                           {'new_user': new_user,
