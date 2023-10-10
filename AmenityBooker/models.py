@@ -59,5 +59,17 @@ class UserReservation(models.Model):
     hours_booked = models.ManyToManyField(Hour)
     active = models.BooleanField(default=True)
     
+    def split_start_end_time(self, start_end_time):
+        start_time, end_time = start_end_time.split('-')
+        return start_time, end_time
+
+    def reservation_period(self):
+        hours = self.hours_booked.all()
+        if hours.exists():
+            start_time = self.split_start_end_time(hours.first().start_end_time)[0]
+            last_end_time = self.split_start_end_time(hours.last().start_end_time)[1]
+            return start_time, last_end_time
+        return None
+    
     def __str__(self):
         return f"{self.user.first_name} {self.user.email} | {self.date}"

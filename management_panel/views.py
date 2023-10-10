@@ -47,15 +47,40 @@ def admin_login(request):
 
     return render(request, 'management/login_admin.html', {'form': form})
 
+
 def hour_start_time(hour_string):
     hour_string = str(hour_string)
     start_time_str = hour_string.split('-')[0]
     return datetime.strptime(start_time_str, '%H:%M').time()
 
-def is_current_time_before(hour_string):
-    current_time = datetime.now().time()
-    start_time, _ = hour_start_time(hour_string)
-    return current_time < start_time
+def hour_start_end_time(hour_start, hour_end):
+    """
+    Converts hour strings in the format 'HH:MM-HH:MM' to datetime.time objects.
+    Parameters:
+    hour_start (str): The starting time in 'HH:MM' format.
+    hour_end (str): The ending time in 'HH:MM' format.
+    Returns: A tuple containing the starting and ending times as datetime.time objects.
+    """
+    hour_start = str(hour_start)
+    hour_end = str(hour_end)
+    start_time_str = hour_start.split('-')[0]
+    end_time_str = hour_end.split('-')[1]
+
+    return datetime.strptime(start_time_str, '%H:%M').time(),\
+           datetime.strptime(end_time_str, '%H:%M').time()
+
+def is_current_reservation(hours_booked, date):
+    current_datetime = datetime.now()
+    start_time, end_time = hour_start_end_time(hours_booked.first(), hours_booked.last())
+
+    if current_datetime.date() == date:
+        if start_time <= end_time:
+            return start_time <= current_datetime.time() <= end_time
+        else:
+            return start_time <= current_datetime.time() or current_datetime.time() <= end_time
+    
+    return False
+
 
 
 @user_passes_test(lambda u: u.is_staff)
@@ -63,8 +88,12 @@ def admin_dashboard(request):
     amenities = Amenity.objects.all()
     latest_reservations = UserReservation.objects.all().order_by('-id')[:10]
     incoming_reservations = UserReservation.objects.all().order_by('-date')[:10]
-    
+    current_reservations = UserReservation.objects.all().order_by('-date')[:10]
     current_datetime = datetime.now()
+    
+    current_reservations = [
+        r for r in current_reservations if is_current_reservation(r.hours_booked, r.date)
+    ]
     
     incoming_reservations = [
         r for r in incoming_reservations
@@ -72,27 +101,27 @@ def admin_dashboard(request):
             any(
                 current_datetime < datetime.combine(r.date, hour_start_time(hour_block))
                 for hour_block in r.hours_booked.all()[:1]
-            ) or r.date > date.today()
-        )
-    ]
+            ) or r.date > date.today())]
 
     incoming_reservations = sorted(
         incoming_reservations,
-        key=lambda r: (min(
-                abs((datetime.combine(r.date, hour_start_time(hour_block)) - current_datetime).seconds)
-                for hour_block in r.hours_booked.all()[:1])))
-
-    # for reservation in incoming_reservations:
-    #     for hour_block in reservation.hours_booked.all()[:1]:
-    #         seconds = abs((datetime.combine(reservation.date, hour_start_time(hour_block)) - current_datetime).seconds)
-    #         print(f"Rezerwacja: {reservation}, Seconds: {seconds}")
-
+        key=lambda r: min(
+            abs((datetime.combine(r.date, hour_start_time(hour_block)) - current_datetime))
+            for hour_block in r.hours_booked.all()[:1]
+        )
+    )
+    
+    for reservation in incoming_reservations:
+        for hour_block in reservation.hours_booked.all()[:1]:
+            seconds = abs((datetime.combine(reservation.date, hour_start_time(hour_block)) - current_datetime).seconds)
+            print(f"Rezerwacja: {reservation}, Seconds: {seconds}, Date: {reservation.date}, current_datetime: {current_datetime}")
 
     return render(request,
                   'management/admin_dashboard.html',
                   {'amenities': amenities,
                    'latest_reservations' : latest_reservations,
                    'incoming_reservations': incoming_reservations,
+                   'current_reservations' : current_reservations,
                    })
     
     
