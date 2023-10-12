@@ -49,6 +49,8 @@
                                     </p>
                                 </div>
                             </div>
+                            {% empty %}
+                                <p>There are no current reservations in progress</p>
                             {% endfor %}
                         </div>
                     </div>
@@ -122,6 +124,7 @@
                                 </div>
                             </div>
                             {% endfor %}
+                            <h5><a href="{% url 'profile_edit' %}">Show all reservations</a>.</h5>
                         </div>
                     </div>
                 </div>

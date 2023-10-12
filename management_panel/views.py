@@ -6,6 +6,7 @@ from django.contrib.auth.decorators import user_passes_test
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.models import User
 from django.contrib import messages
+from django.contrib.postgres.search import SearchVector
 from django.utils.decorators import method_decorator
 from django.views.generic import ListView
 from django.urls import reverse
@@ -13,7 +14,7 @@ from django.http import JsonResponse, HttpResponse, HttpResponseNotAllowed
 
 from account.models import Profile, Comment
 from AmenityBooker.models import Amenity
-from .forms import AdminLoginForm, PageNumberForm, TenantEditForm, CommentForm
+from .forms import AdminLoginForm, PageNumberForm, TenantEditForm, CommentForm, SearchForm
 from AmenityBooker.models import UserReservation, ReservationModel, Amenity
 
 
@@ -114,7 +115,6 @@ def admin_dashboard(request):
     for reservation in incoming_reservations:
         for hour_block in reservation.hours_booked.all()[:1]:
             seconds = abs((datetime.combine(reservation.date, hour_start_time(hour_block)) - current_datetime).seconds)
-            print(f"Rezerwacja: {reservation}, Seconds: {seconds}, Date: {reservation.date}, current_datetime: {current_datetime}")
 
     return render(request,
                   'management/admin_dashboard.html',
@@ -123,6 +123,9 @@ def admin_dashboard(request):
                    'incoming_reservations': incoming_reservations,
                    'current_reservations' : current_reservations,
                    })
+    
+    
+    # TO DO: wyszukiwarka w tenants, tworzenie postów na blogu
     
     
 @user_passes_test(lambda u: u.is_staff)
@@ -143,42 +146,13 @@ def admin_amenity_active(request, amenity_id):
             return JsonResponse(response_data, status=403)
     else:
         return HttpResponseNotAllowed(['POST'])
-
     
-@user_passes_test(lambda u: u.is_staff)
-def admin_tenants(request):
-    all_users = Profile.objects.all().order_by('id')
-    paginator = Paginator(all_users, 25)
-
-    if request.method == 'POST':
-        form = PageNumberForm(request.POST)
-        if form.is_valid():
-            page = form.cleaned_data['page']
-            return redirect('admin_tenants', page=page)
-    else:
-        form = PageNumberForm()
-
-    page = request.GET.get('page')
-
-    try:
-        users = paginator.page(page)
-    except PageNotAnInteger:
-        users = paginator.page(1)
-    except EmptyPage:
-        users = paginator.page(paginator.num_pages)
-
-    return render(request,
-                  'management/admin_tenants.html',
-                  {'users': users,
-                   'page': page,
-                   'page_num': paginator.num_pages,
-                   'form': form})
 
 @method_decorator(user_passes_test(lambda u: u.is_staff), name='dispatch')
 class TenantsListView(ListView):
     queryset = Profile.objects.all()
     context_object_name = 'users'
-    paginate_by = 25
+    paginate_by = 3
     template_name = 'management/admin_tenants.html'
 
 
@@ -193,6 +167,31 @@ def toggle_user_active(request, user_id):
             return JsonResponse({'success': False, 'error': 'User not found'})
 
     return JsonResponse({'success': False, 'error': 'Invalid request'})
+
+
+@user_passes_test(lambda u: u.is_staff)
+def tenant_search(request):
+    form = SearchForm()
+    query = None
+    results = []
+    
+    if 'query' in request.GET:
+        form = SearchForm(request.GET)
+        if form.is_valid():
+            query = form.cleaned_data['query']
+            results = User.objects.annotate(
+                search=SearchVector('first_name', 'last_name'),
+            ).filter(search=query)
+    
+    print(query)
+    print(results)
+    
+    return render(request, 'management/admin_tenant_search.html',
+                  {'form': form, 
+                   'query': query, 
+                   'results': results})
+
+
 
 @user_passes_test(lambda u: u.is_staff)
 def admin_tenant_profile(request, user_id, name, surname):
@@ -247,8 +246,6 @@ def admin_tenant_profile(request, user_id, name, surname):
         'amenities': amenities,
         'amenities_active': amenities_active,
     })
-
-
 
 @user_passes_test(lambda u: u.is_staff)
 def reservation_delete(request, reservation_id):
