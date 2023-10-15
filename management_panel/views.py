@@ -183,9 +183,6 @@ def tenant_search(request):
                 search=SearchVector('first_name', 'last_name'),
             ).filter(search=query)
     
-    print(query)
-    print(results)
-    
     return render(request, 'management/admin_tenant_search.html',
                   {'form': form, 
                    'query': query, 
