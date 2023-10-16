@@ -39,7 +39,11 @@
             </div>
         </form>
         <div>
+            {% if page.number == None %}
             <p style="font-family: 'Bebas Neue', serif;font-size:20px;">Page {{ page.number }} out of {{ page.paginator.num_pages }}</p>
+            {% else %}
+            <p style="font-family: 'Bebas Neue', serif;font-size:20px;">blabla</p>
+            {% endif %}
         </div>
     </div>
 </nav>

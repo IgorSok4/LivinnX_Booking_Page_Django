@@ -25,7 +25,7 @@
     <div class="col-xl-10 col-xxl-9">
         <div class="card shadow">
             <div class="card-header d-flex flex-wrap justify-content-center align-items-center justify-content-sm-between gap-3">
-                <h5 class="display-6 text-nowrap text-capitalize mb-0" style="font-family: 'Bebas Neue', serif;">All users</h5>
+                <h5 class="display-6 text-nowrap text-capitalize mb-0" style="font-family: 'Bebas Neue', serif;">Search Users</h5>
                 <div class="input-group input-group-sm w-auto">
                     <form method="get">
                         {{ form.query }}
@@ -62,7 +62,7 @@
                                     <button class="btn btn-outline-primary btn-sm toggle-active"
                                             data-user-id="{{ user.id }}"
                                             data-url="{% url 'toggle_user_active' user.id %}">
-                                        {% if user.active %}
+                                        {% if user.user.active %}
                                             Deactivate
                                         {% else %}
                                             Activate
@@ -88,7 +88,7 @@
                 </div>
             </div>
             <div class="card-footer">
-                {% include "management/pagination.html" with page=page_obj %}
+                <p style="font-family: 'Bebas Neue', serif;font-size:20px;">Found {{ results_count }}</p>
             </div>
         </div>
     </div>

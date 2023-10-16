@@ -6,7 +6,7 @@ from django.contrib.auth.decorators import user_passes_test
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.models import User
 from django.contrib import messages
-from django.contrib.postgres.search import SearchVector
+from django.contrib.postgres.search import SearchVector, SearchQuery, SearchRank, TrigramSimilarity
 from django.utils.decorators import method_decorator
 from django.views.generic import ListView
 from django.urls import reverse
@@ -125,9 +125,6 @@ def admin_dashboard(request):
                    })
     
     
-    # TO DO: wyszukiwarka w tenants, tworzenie postów na blogu
-    
-    
 @user_passes_test(lambda u: u.is_staff)
 def admin_amenity_active(request, amenity_id):
     amenity = get_object_or_404(Amenity, id=amenity_id)
@@ -180,14 +177,14 @@ def tenant_search(request):
         if form.is_valid():
             query = form.cleaned_data['query']
             results = User.objects.annotate(
-                search=SearchVector('first_name', 'last_name'),
-            ).filter(search=query)
-    
+                similarity=TrigramSimilarity('first_name', query) + TrigramSimilarity('last_name', query)
+            ).filter(similarity__gt=0.1).order_by('-similarity')
+
     return render(request, 'management/admin_tenant_search.html',
                   {'form': form, 
                    'query': query, 
-                   'results': results})
-
+                   'results': results,
+                   'results_count': len(results),})
 
 
 @user_passes_test(lambda u: u.is_staff)
