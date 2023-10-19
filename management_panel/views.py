@@ -282,6 +282,31 @@ def toggle_reservation_active(request, reservation_id):
     return JsonResponse({'success': False, 'error': 'Invalid request'})
 
 
+@user_passes_test(lambda u: u.is_staff)
+def admin_tenant_amenity_active(request, user_id, amenity_slug):
+    user_main = User.objects.get(id=user_id)
+    user_profile = Profile.objects.get(id=user_id)
+    user_admin = request.user
+
+    amenity_active_attribute = f"{amenity_slug}_active"
+    user_active_amenity = getattr(user_profile, amenity_active_attribute)
+
+    if request.method == "POST":
+        if user_admin.is_superuser:
+            setattr(user_profile, amenity_active_attribute, not user_active_amenity)
+            user_profile.save()
+            return redirect('admin_tenant_profile', name=user_main.first_name, surname=user_main.last_name, user_id=user_id)
+        else:
+            response_data = {
+                "message": "You don't have permission.",
+                "success": False
+            }
+            return JsonResponse(response_data, status=403)
+    else:
+        return HttpResponseNotAllowed(['POST'])
+
+
+
 def delete_comment(request, user_id, comment_id):
     comment = get_object_or_404(Comment, id=comment_id)
     

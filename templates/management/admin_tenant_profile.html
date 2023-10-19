@@ -172,13 +172,16 @@
                                             This amenity is currently inactive for this Tenant.
                                         {% endif %}                                        
                                     </p>
-                                    <button class="btn btn-danger toggle-active" data-reservation-id="{{ reservation.id }}" data-url="#">
-                                        {% if user.active %}
-                                            Deactivate
-                                        {% else %}
-                                            Activate
-                                        {% endif %}
-                                    </button>
+                                    <form method="POST" action="{% url 'admin_tenant_amenity_active' amenity_slug=amenity_detail.name|lower user_id=user.id %}">
+                                        {% csrf_token %}
+                                        <button class="btn btn-danger toggle-active" data-reservation-id="{{ reservation.id }}" type="submit" data-url="{% url 'admin_tenant_amenity_active' user_id=user.id amenity_slug=amenity_detail.name %}">
+                                            {% if amenity_detail.active %}
+                                                Deactivate
+                                            {% else %}
+                                                Activate
+                                            {% endif %}
+                                        </button>
+                                    </form>
                                 </div>
                             </div>
                             {% endfor %}           
